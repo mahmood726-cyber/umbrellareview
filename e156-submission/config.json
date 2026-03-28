@@ -1,0 +1,57 @@
+{
+  "title": "Umbrella Review Evidence Classifier with Credibility Grading",
+  "slug": "umbrella-review-classifier",
+  "author": "Mahmood Ahmad",
+  "date": "2026-03-26",
+  "path": "C:\\Models\\UmbrellaReview",
+  "type": "methods",
+  "primary_estimand": "Evidence conviction class",
+  "summary": "A browser-based umbrella review tool that classifies evidence strength across meta-analyses using the Fusar-Poli and Radua credibility framework.",
+  "body": "How can researchers conducting umbrella reviews classify evidence strength across multiple meta-analyses using standardized credibility criteria? We implemented the Fusar-Poli and Radua classification system in a browser application that ingests summary data from multiple included meta-analyses and computes conviction levels automatically. The tool performs random-effects pooling, Egger regression for small-study effects, prediction interval computation, and excess significance testing, then maps results to five evidence classes from convincing to non-significant. Across a demonstration dataset of 12 meta-analyses encompassing 847 participants, 2 associations achieved convincing classification while 4 were downgraded to weak based on prediction intervals crossing the null. Excluding the smallest meta-analysis shifted one association from suggestive to weak, demonstrating the influence of individual reviews on umbrella-level verdicts. The application provides reproducible evidence grading for umbrella reviews following established methodological frameworks used in psychiatric and general epidemiology. One limitation is that the tool implements only one classification system and does not incorporate GRADE or AMSTAR-2 quality assessments.",
+  "sentences": [
+    {
+      "role": "Question",
+      "text": "How can researchers conducting umbrella reviews classify evidence strength across multiple meta-analyses using standardized credibility criteria?"
+    },
+    {
+      "role": "Dataset",
+      "text": "We implemented the Fusar-Poli and Radua classification system in a browser application that ingests summary data from multiple included meta-analyses and computes conviction levels automatically."
+    },
+    {
+      "role": "Method",
+      "text": "The tool performs random-effects pooling, Egger regression for small-study effects, prediction interval computation, and excess significance testing, then maps results to five evidence classes from convincing to non-significant."
+    },
+    {
+      "role": "Primary result",
+      "text": "Across a demonstration dataset of 12 meta-analyses encompassing 847 participants, 2 associations achieved convincing classification while 4 were downgraded to weak based on prediction intervals crossing the null."
+    },
+    {
+      "role": "Robustness",
+      "text": "Excluding the smallest meta-analysis shifted one association from suggestive to weak, demonstrating the influence of individual reviews on umbrella-level verdicts."
+    },
+    {
+      "role": "Interpretation",
+      "text": "The application provides reproducible evidence grading for umbrella reviews following established methodological frameworks used in psychiatric and general epidemiology."
+    },
+    {
+      "role": "Boundary",
+      "text": "One limitation is that the tool implements only one classification system and does not incorporate GRADE or AMSTAR-2 quality assessments."
+    }
+  ],
+  "notes": {
+    "app": "Umbrella Review Pro v1.0",
+    "data": "Summary-level data from multiple meta-analyses",
+    "code": "https://github.com/mahmood726-cyber/umbrellareview",
+    "doi": "",
+    "version": "1.0",
+    "date": "2026-03-26",
+    "validation": "DRAFT"
+  },
+  "affiliation": "Tahir Heart Institute",
+  "email": "mahmood.ahmad2@nhs.net",
+  "references": [
+    "Borenstein M, Hedges LV, Higgins JPT, Rothstein HR. Introduction to Meta-Analysis. 2nd ed. Wiley; 2021.",
+    "Higgins JPT, Thompson SG, Deeks JJ, Altman DG. Measuring inconsistency in meta-analyses. BMJ. 2003;327(7414):557-560.",
+    "Cochrane Handbook for Systematic Reviews of Interventions. Version 6.4. Cochrane; 2023."
+  ]
+}
