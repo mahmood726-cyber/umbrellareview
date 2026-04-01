@@ -1,0 +1,26 @@
+{
+  "name": "SGLT2i in Heart Failure",
+  "reviews": [
+    {
+      "review_id": "Zannad2020", "theta": -0.4005, "ci_lo": -0.5447, "ci_hi": -0.2485,
+      "k": 4, "measure": "logHR", "year": 2020, "label": "Zannad 2020",
+      "study_ids": ["DAPA-HF", "EMPEROR-Reduced", "SOLOIST-WHF", "SCORED"],
+      "scope_tags": ["adults", "HFrEF", "CV_death_HF_hosp", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "yes", "3": "yes", "4": "yes", "5": "yes", "6": "yes", "7": "yes", "8": "yes", "9": "yes", "10": "yes", "11": "yes", "12": "yes", "13": "yes", "14": "yes", "15": "partial", "16": "yes"}
+    },
+    {
+      "review_id": "Vaduganathan2022", "theta": -0.3567, "ci_lo": -0.4620, "ci_hi": -0.2485,
+      "k": 6, "measure": "logHR", "year": 2022, "label": "Vaduganathan 2022",
+      "study_ids": ["DAPA-HF", "EMPEROR-Reduced", "DELIVER", "SOLOIST-WHF", "EMPEROR-Preserved", "SCORED"],
+      "scope_tags": ["adults", "HFrEF+HFpEF", "CV_death_HF_hosp", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "yes", "3": "yes", "4": "yes", "5": "yes", "6": "yes", "7": "yes", "8": "yes", "9": "yes", "10": "yes", "11": "yes", "12": "yes", "13": "yes", "14": "yes", "15": "yes", "16": "yes"}
+    },
+    {
+      "review_id": "McGuire2021", "theta": -0.3857, "ci_lo": -0.5108, "ci_hi": -0.2614,
+      "k": 5, "measure": "logHR", "year": 2021, "label": "McGuire 2021",
+      "study_ids": ["DAPA-HF", "EMPEROR-Reduced", "SOLOIST-WHF", "SCORED", "VERTIS-CV"],
+      "scope_tags": ["adults", "HFrEF", "CV_death_HF_hosp", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "yes", "3": "yes", "4": "yes", "5": "yes", "6": "yes", "7": "partial", "8": "yes", "9": "yes", "10": "yes", "11": "yes", "12": "yes", "13": "yes", "14": "yes", "15": "yes", "16": "yes"}
+    }
+  ]
+}

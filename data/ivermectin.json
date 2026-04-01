@@ -1,0 +1,33 @@
+{
+  "name": "Ivermectin for COVID-19",
+  "reviews": [
+    {
+      "review_id": "Hill2021", "theta": -0.9676, "ci_lo": -1.6607, "ci_hi": -0.3147,
+      "k": 15, "measure": "logOR", "year": 2021, "label": "Hill 2021",
+      "study_ids": ["Elgazzar", "Niaee", "Ahmed", "Chaccour", "Babalola", "Hashim", "Mahmud", "Ravikirti", "Chahla", "Lopez-Medina", "Okumus", "Podder", "Gonzalez", "Krolewiecki", "Mohan"],
+      "scope_tags": ["adults", "COVID_inpatient+outpatient", "mortality", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "no", "3": "no", "4": "partial", "5": "no", "6": "no", "7": "no", "8": "partial", "9": "no", "10": "no", "11": "no", "12": "no", "13": "no", "14": "partial", "15": "no", "16": "yes"}
+    },
+    {
+      "review_id": "Roman2022", "theta": -0.1054, "ci_lo": -0.5621, "ci_hi": 0.3507,
+      "k": 10, "measure": "logRR", "year": 2022, "label": "Roman 2022",
+      "study_ids": ["Ahmed", "Chaccour", "Lopez-Medina", "Ravikirti", "Chahla", "Vallejos", "Reis", "TOGETHER", "Abd-Elsalam", "Lim"],
+      "scope_tags": ["adults", "COVID_outpatient", "mortality", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "yes", "3": "yes", "4": "yes", "5": "yes", "6": "yes", "7": "yes", "8": "yes", "9": "yes", "10": "yes", "11": "yes", "12": "yes", "13": "yes", "14": "yes", "15": "yes", "16": "yes"}
+    },
+    {
+      "review_id": "Popp2022", "theta": -0.4005, "ci_lo": -0.9163, "ci_hi": 0.1133,
+      "k": 14, "measure": "logRR", "year": 2022, "label": "Popp 2022 (Cochrane)",
+      "study_ids": ["Ahmed", "Chaccour", "Lopez-Medina", "Ravikirti", "Chahla", "Vallejos", "Reis", "TOGETHER", "Abd-Elsalam", "Lim", "Hashim", "Mahmud", "Okumus", "Gonzalez"],
+      "scope_tags": ["adults", "COVID_inpatient+outpatient", "mortality", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "yes", "3": "yes", "4": "yes", "5": "yes", "6": "yes", "7": "yes", "8": "yes", "9": "yes", "10": "yes", "11": "yes", "12": "yes", "13": "yes", "14": "yes", "15": "yes", "16": "yes"}
+    },
+    {
+      "review_id": "Bryant2021", "theta": -1.1712, "ci_lo": -1.9661, "ci_hi": -0.4308,
+      "k": 24, "measure": "logOR", "year": 2021, "label": "Bryant 2021",
+      "study_ids": ["Elgazzar", "Niaee", "Ahmed", "Chaccour", "Babalola", "Hashim", "Mahmud", "Ravikirti", "Chahla", "Lopez-Medina", "Okumus", "Podder", "Gonzalez", "Krolewiecki", "Mohan", "Vallejos", "Reis", "Abd-Elsalam", "Lim", "Carvallo", "Shouman", "Alam", "Chowdhury", "Bukhari"],
+      "scope_tags": ["adults", "COVID_inpatient+outpatient", "mortality", "RCTs+observational"],
+      "amstar_items": {"1": "yes", "2": "no", "3": "no", "4": "partial", "5": "yes", "6": "no", "7": "no", "8": "partial", "9": "no", "10": "no", "11": "partial", "12": "no", "13": "partial", "14": "yes", "15": "no", "16": "yes"}
+    }
+  ]
+}

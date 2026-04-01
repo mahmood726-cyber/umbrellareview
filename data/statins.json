@@ -1,0 +1,40 @@
+{
+  "name": "Statins for Primary CV Prevention",
+  "reviews": [
+    {
+      "review_id": "CTT2012", "theta": -0.3147, "ci_lo": -0.4005, "ci_hi": -0.2231,
+      "k": 27, "measure": "logOR", "year": 2012, "label": "CTT 2012",
+      "study_ids": ["4S", "WOSCOPS", "CARE", "LIPID", "AFCAPS", "HPS", "PROSPER", "ALLHAT", "ASCOT", "CARDS", "TNT", "IDEAL", "SPARCL", "JUPITER", "SHARP", "MEGA", "ALERT", "AURORA", "GISSI-HF", "CORONA", "A2Z", "PROVE-IT", "SEARCH", "ACCORD", "AIM-HIGH", "dal-OUTCOMES", "ASPEN"],
+      "scope_tags": ["adults", "primary+secondary", "mortality", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "yes", "3": "yes", "4": "yes", "5": "yes", "6": "yes", "7": "yes", "8": "yes", "9": "yes", "10": "yes", "11": "yes", "12": "yes", "13": "yes", "14": "yes", "15": "yes", "16": "yes"}
+    },
+    {
+      "review_id": "Ray2010", "theta": -0.0943, "ci_lo": -0.1863, "ci_hi": 0.0100,
+      "k": 11, "measure": "logRR", "year": 2010, "label": "Ray 2010",
+      "study_ids": ["WOSCOPS", "AFCAPS", "ASCOT", "MEGA", "JUPITER", "ALLHAT", "PROSPER", "HPS", "CARDS", "HYVET", "ASPEN"],
+      "scope_tags": ["adults", "primary_only", "all_cause_mortality", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "no", "3": "yes", "4": "yes", "5": "yes", "6": "yes", "7": "no", "8": "yes", "9": "yes", "10": "no", "11": "yes", "12": "yes", "13": "yes", "14": "yes", "15": "yes", "16": "yes"}
+    },
+    {
+      "review_id": "Taylor2013", "theta": -0.1508, "ci_lo": -0.2357, "ci_hi": -0.0619,
+      "k": 18, "measure": "logRR", "year": 2013, "label": "Taylor 2013",
+      "study_ids": ["WOSCOPS", "AFCAPS", "ASCOT", "MEGA", "JUPITER", "ALLHAT", "CARDS", "HYVET", "PREVEND-IT", "CAIUS", "KAPS", "ACAPS", "BCAPS", "PHYLLIS", "FAST", "ASPEN", "HOPE-3", "TRACE-RA"],
+      "scope_tags": ["adults", "primary_only", "CV_events", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "yes", "3": "yes", "4": "yes", "5": "yes", "6": "yes", "7": "yes", "8": "yes", "9": "yes", "10": "yes", "11": "yes", "12": "yes", "13": "yes", "14": "yes", "15": "yes", "16": "yes"}
+    },
+    {
+      "review_id": "Tonelli2011", "theta": -0.1625, "ci_lo": -0.2614, "ci_hi": -0.0513,
+      "k": 9, "measure": "logRR", "year": 2011, "label": "Tonelli 2011",
+      "study_ids": ["WOSCOPS", "AFCAPS", "ASCOT", "MEGA", "JUPITER", "ALLHAT", "CARDS", "PROSPER", "HPS"],
+      "scope_tags": ["adults", "primary_only", "CV_events", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "no", "3": "yes", "4": "yes", "5": "yes", "6": "no", "7": "no", "8": "yes", "9": "yes", "10": "yes", "11": "yes", "12": "no", "13": "yes", "14": "yes", "15": "no", "16": "yes"}
+    },
+    {
+      "review_id": "Chou2022", "theta": -0.1985, "ci_lo": -0.3011, "ci_hi": -0.1054,
+      "k": 23, "measure": "logRR", "year": 2022, "label": "Chou 2022",
+      "study_ids": ["WOSCOPS", "AFCAPS", "ASCOT", "MEGA", "JUPITER", "ALLHAT", "CARDS", "PROSPER", "HPS", "HOPE-3", "HYVET", "PREVEND-IT", "TRACE-RA", "4S", "CARE", "LIPID", "TNT", "IDEAL", "SPARCL", "SHARP", "CORONA", "GISSI-HF", "AURORA"],
+      "scope_tags": ["adults", "primary+secondary", "CV_events", "RCTs"],
+      "amstar_items": {"1": "yes", "2": "yes", "3": "yes", "4": "yes", "5": "yes", "6": "yes", "7": "yes", "8": "yes", "9": "yes", "10": "yes", "11": "yes", "12": "yes", "13": "yes", "14": "yes", "15": "yes", "16": "yes"}
+    }
+  ]
+}
