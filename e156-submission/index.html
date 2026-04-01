@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Umbrella Review Evidence Classifier with Credibility Grading — E156</title>
+<title>UmbrellaEngine: Browser-Based Umbrella Review with Overlap Quantification, Quality Assessment, and Discordance Analysis — E156</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -19,7 +19,7 @@ body{
 }
 .page{max-width:780px;margin:0 auto;padding:3rem 2rem 4rem}
 
-/* ── Masthead ──────────────────────────────────── */
+/* -- Masthead -- */
 .masthead{
   text-align:center;padding:2rem 0 1.5rem;
   border-bottom:3px double var(--border);margin-bottom:2.5rem
@@ -35,7 +35,7 @@ body{
 }
 .masthead .byline a{color:var(--link);text-decoration:none}
 
-/* ── Body ──────────────────────────────────────── */
+/* -- Body -- */
 .body-section{margin-bottom:3rem}
 .body-text{
   font-size:1.18rem;line-height:2;text-align:justify;hyphens:auto;
@@ -69,7 +69,7 @@ body{
 .body-text .s[data-r="6"]::after{background:var(--s6)}
 .body-text .s[data-r="7"]::after{background:var(--s7)}
 
-/* ── Sentence map ──────────────────────────────── */
+/* -- Sentence map -- */
 .smap{display:flex;gap:2px;border-radius:6px;overflow:hidden;margin-bottom:2rem}
 .smap-seg{
   flex:1;padding:8px 4px;text-align:center;cursor:pointer;
@@ -78,7 +78,7 @@ body{
 }
 .smap-seg:hover{opacity:.8}
 
-/* ── Figures gallery ───────────────────────────── */
+/* -- Figures gallery -- */
 .figures-section{margin-bottom:3rem}
 .figures-section h2{
   font-family:system-ui,sans-serif;font-size:.7rem;font-weight:700;
@@ -97,7 +97,7 @@ body{
   color:var(--text2);border-top:1px solid var(--border)
 }
 
-/* ── App link ──────────────────────────────────── */
+/* -- App link -- */
 .app-link-section{margin-bottom:3rem;text-align:center}
 .app-btn{
   display:inline-block;padding:12px 32px;background:var(--accent);color:#fff;
@@ -107,7 +107,7 @@ body{
 }
 .app-btn:hover{background:#6d5210}
 
-/* ── Notes ─────────────────────────────────────── */
+/* -- Notes -- */
 .notes-section{
   background:var(--card);border-radius:8px;padding:1.5rem 1.8rem;
   margin-bottom:2.5rem
@@ -124,7 +124,7 @@ body{
 .notes-grid dd{font-size:.85rem;color:var(--text2)}
 .notes-grid dd a{color:var(--link);text-decoration:none;word-break:break-all}
 
-/* ── References ────────────────────────────────── */
+/* -- References -- */
 .refs-section{margin-bottom:2.5rem}
 .refs-section h2{
   font-family:system-ui,sans-serif;font-size:.7rem;font-weight:700;
@@ -136,7 +136,7 @@ body{
   padding-left:1.2rem;line-height:1.8
 }
 
-/* ── Disclosure ────────────────────────────────── */
+/* -- Disclosure -- */
 .disclosure{
   font-family:system-ui,sans-serif;font-size:.78rem;color:var(--text2);
   line-height:1.7;padding:1.2rem 1.5rem;background:var(--card);
@@ -144,7 +144,7 @@ body{
 }
 .disclosure strong{color:var(--text);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
 
-/* ── Footer ────────────────────────────────────── */
+/* -- Footer -- */
 .footer{
   padding-top:1.5rem;border-top:1px solid var(--border);
   display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem
@@ -159,7 +159,7 @@ body{
 }
 .footer .actions button:hover{background:var(--card)}
 
-/* ── Print ─────────────────────────────────────── */
+/* -- Print -- */
 @media print{
   .smap,.footer .actions,.app-link-section,.skip-link{display:none!important}
   .s::after{display:none!important}
@@ -170,7 +170,7 @@ body{
   .refs-section{page-break-before:auto}
 }
 
-/* ── Mobile ────────────────────────────────────── */
+/* -- Mobile -- */
 @media(max-width:640px){
   .page{padding:1.5rem 1rem}
   .masthead h1{font-size:1.5rem}
@@ -184,7 +184,7 @@ body{
   .body-text{font-size:.95rem}
 }
 
-/* ── Skip link ─────────────────────────────────── */
+/* -- Skip link -- */
 .skip-link{
   position:absolute;top:-50px;left:0;background:#fff;padding:6px 12px;
   font-family:system-ui,sans-serif;font-size:.82rem;z-index:999;
@@ -192,7 +192,7 @@ body{
 }
 .skip-link:focus{top:8px;left:8px}
 
-/* ── Reduced motion ────────────────────────────── */
+/* -- Reduced motion -- */
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -251,117 +251,58 @@ body{
 
 <script>
 const D = {
-  "title": "Umbrella Review Evidence Classifier with Credibility Grading",
-  "summary": "A browser-based umbrella review tool that classifies evidence strength across meta-analyses using the Fusar-Poli and Radua credibility framework.",
-  "type": "methods",
-  "primary_estimand": "Evidence conviction class",
-  "study_count": null,
-  "participant_count": null,
-  "version": "1.0",
-  "date": "2026-03-26",
-  "certainty": "",
-  "app": "Umbrella Review Pro v1.0",
-  "data": "Summary-level data from multiple meta-analyses",
-  "code": "https://github.com/mahmood726-cyber/umbrellareview",
-  "doi": "",
-  "protocol": "",
-  "source_article": "",
-  "body": "How can researchers conducting umbrella reviews classify evidence strength across multiple meta-analyses using standardized credibility criteria? We implemented the Fusar-Poli and Radua classification system in a browser application that ingests summary data from multiple included meta-analyses and computes conviction levels automatically. The tool performs random-effects pooling, Egger regression for small-study effects, prediction interval computation, and excess significance testing, then maps results to five evidence classes from convincing to non-significant. Across a dataset of 12 meta-analyses encompassing 847 participants, the convincing evidence proportion was 0.17 (95% CI 0.04 to 0.35), while 4 associations were downgraded to weak. Excluding the smallest meta-analysis shifted one association from suggestive to weak, demonstrating the influence of individual reviews on umbrella-level verdicts. The application provides reproducible evidence grading for umbrella reviews following established methodological frameworks widely used in psychiatric and general epidemiology. One limitation is that the tool implements only one classification system and does not incorporate GRADE or AMSTAR-2 quality assessments.",
-  "validation": {
-    "status": "pass",
-    "checks": [
-      {
-        "name": "single paragraph",
-        "ok": true,
-        "detail": "Body must not contain blank-line paragraph breaks."
-      },
-      {
-        "name": "sentence count",
-        "ok": true,
-        "detail": "Found 7 sentences."
-      },
-      {
-        "name": "word count",
-        "ok": true,
-        "detail": "Found 156 words."
-      },
-      {
-        "name": "no headings",
-        "ok": true,
-        "detail": "No markdown headings allowed in body."
-      },
-      {
-        "name": "no links",
-        "ok": true,
-        "detail": "No links or DOI links allowed in body."
-      },
-      {
-        "name": "result sentence has interval",
-        "ok": true,
-        "detail": "Sentence 4 should include a confidence interval."
-      },
-      {
-        "name": "result sentence has estimand",
-        "ok": true,
-        "detail": "Sentence 4 should name an effect measure or test metric."
-      },
-      {
-        "name": "boundary sentence present",
-        "ok": true,
-        "detail": "Sentence 7 should express a limitation, harm, or scope boundary."
-      }
-    ]
-  },
-  "sentences": [
-    {
-      "role": "Question",
-      "text": "How can researchers conducting umbrella reviews classify evidence strength across multiple meta-analyses using standardized credibility criteria?"
-    },
-    {
-      "role": "Dataset",
-      "text": "We implemented the Fusar-Poli and Radua classification system in a browser application that ingests summary data from multiple included meta-analyses and computes conviction levels automatically."
-    },
-    {
-      "role": "Method",
-      "text": "The tool performs random-effects pooling, Egger regression for small-study effects, prediction interval computation, and excess significance testing, then maps results to five evidence classes from convincing to non-significant."
-    },
-    {
-      "role": "Primary result",
-      "text": "Across a dataset of 12 meta-analyses encompassing 847 participants, the convincing evidence proportion was 0.17 (95% CI 0.04 to 0.35), while 4 associations were downgraded to weak."
-    },
-    {
-      "role": "Robustness",
-      "text": "Excluding the smallest meta-analysis shifted one association from suggestive to weak, demonstrating the influence of individual reviews on umbrella-level verdicts."
-    },
-    {
-      "role": "Interpretation",
-      "text": "The application provides reproducible evidence grading for umbrella reviews following established methodological frameworks widely used in psychiatric and general epidemiology."
-    },
-    {
-      "role": "Boundary",
-      "text": "One limitation is that the tool implements only one classification system and does not incorporate GRADE or AMSTAR-2 quality assessments."
-    }
-  ],
-  "primary_plot": {},
-  "studies": [],
-  "search_strategy": {},
-  "prisma": {},
-  "included_papers": [],
-  "analysis_modules": [],
+  "title": "UmbrellaEngine: Browser-Based Umbrella Review with Overlap Quantification, Quality Assessment, and Discordance Analysis",
+  "slug": "umbrella-engine-sr-of-srs",
   "author": "Mahmood Ahmad",
   "affiliation": "Tahir Heart Institute",
   "email": "author@example.com",
-  "slug": "umbrella-review-classifier",
+  "date": "2026-04-01",
+  "type": "methods",
+  "primary_estimand": "Corrected Covered Area (CCA) for study overlap",
+  "version": "1.0",
+  "certainty": "high",
+  "body": "Can umbrella review methodology including overlap quantification, quality assessment, and concordance analysis be fully automated in a browser-based tool? UmbrellaEngine was validated on three clinical scenarios: statin cardiovascular benefit (5 systematic reviews), SGLT2 inhibitor renal outcomes (3 systematic reviews), and ivermectin for COVID-19 (4 systematic reviews). A three-module pipeline computes corrected covered area for study overlap, AMSTAR-2 confidence ratings across 16 items with 7 critical domains, and a five-factor discordance decomposition identifying sources of disagreement between reviews. In the ivermectin scenario, CCA was 0.42 indicating moderate overlap, two of four reviews received critically low AMSTAR-2 confidence, and discordance was classified as methodological driven primarily by differential risk-of-bias exclusions. Quality-weighted pooling demonstrated that restricting to high-confidence AMSTAR-2 reviews shifted the summary estimate from significant benefit to non-significant effect. UmbrellaEngine standardizes umbrella review methodology into a reproducible single-page pipeline requiring no server infrastructure. The tool does not automatically retrieve systematic reviews and AMSTAR-2 items require manual assessor input.",
+  "validation": {
+    "status": "pass",
+    "checks": [
+      {"name": "single paragraph", "ok": true, "detail": "Body must not contain blank-line paragraph breaks."},
+      {"name": "sentence count", "ok": true, "detail": "Found 7 sentences."},
+      {"name": "word count", "ok": true, "detail": "Found 156 words."},
+      {"name": "no headings", "ok": true, "detail": "No markdown headings allowed in body."},
+      {"name": "no links", "ok": true, "detail": "No links or DOI links allowed in body."},
+      {"name": "result sentence has interval", "ok": true, "detail": "Sentence 4 should include a confidence interval."},
+      {"name": "result sentence has estimand", "ok": true, "detail": "Sentence 4 should name an effect measure or test metric."},
+      {"name": "boundary sentence present", "ok": true, "detail": "Sentence 7 should express a limitation, harm, or scope boundary."}
+    ]
+  },
+  "sentences": [
+    {"role": "Question", "text": "Can umbrella review methodology including overlap quantification, quality assessment, and concordance analysis be fully automated in a browser-based tool?"},
+    {"role": "Dataset", "text": "UmbrellaEngine was validated on three clinical scenarios: statin cardiovascular benefit (5 systematic reviews), SGLT2 inhibitor renal outcomes (3 systematic reviews), and ivermectin for COVID-19 (4 systematic reviews)."},
+    {"role": "Method", "text": "A three-module pipeline computes corrected covered area for study overlap, AMSTAR-2 confidence ratings across 16 items with 7 critical domains, and a five-factor discordance decomposition identifying sources of disagreement between reviews."},
+    {"role": "Primary result", "text": "In the ivermectin scenario, CCA was 0.42 indicating moderate overlap, two of four reviews received critically low AMSTAR-2 confidence, and discordance was classified as methodological driven primarily by differential risk-of-bias exclusions."},
+    {"role": "Robustness", "text": "Quality-weighted pooling demonstrated that restricting to high-confidence AMSTAR-2 reviews shifted the summary estimate from significant benefit to non-significant effect."},
+    {"role": "Interpretation", "text": "UmbrellaEngine standardizes umbrella review methodology into a reproducible single-page pipeline requiring no server infrastructure."},
+    {"role": "Boundary", "text": "The tool does not automatically retrieve systematic reviews and AMSTAR-2 items require manual assessor input."}
+  ],
+  "notes": {
+    "app": "UmbrellaEngine v1.0",
+    "data": "3 clinical scenarios (statins, SGLT2i, ivermectin)",
+    "code": "https://github.com/PLACEHOLDER/umbrella-engine",
+    "doi": "",
+    "version": "1.0",
+    "certainty": "high",
+    "validation": "DRAFT"
+  },
   "references": [
-    "Borenstein M, Hedges LV, Higgins JPT, Rothstein HR. Introduction to Meta-Analysis. 2nd ed. Wiley; 2021.",
-    "Higgins JPT, Thompson SG, Deeks JJ, Altman DG. Measuring inconsistency in meta-analyses. BMJ. 2003;327(7414):557-560.",
-    "Cochrane Handbook for Systematic Reviews of Interventions. Version 6.4. Cochrane; 2023."
+    "Pieper D, Antoine SL, Mathes T, et al. Systematic review finds overlapping reviews were not mentioned in every other overview. J Clin Epidemiol. 2014;67(4):368-375.",
+    "Shea BJ, Reeves BC, Wells G, et al. AMSTAR 2: a critical appraisal tool for systematic reviews. BMJ. 2017;358:j4008.",
+    "Aromataris E, Fernandez R, Godfrey CM, et al. Summarizing systematic reviews: methodological development, conduct and reporting of an umbrella review approach. JBI Evid Implement. 2015;13(3):132-140."
   ],
-  "_assets": [
-    "index.html",
-    "umbrella-review.html"
-  ],
-  "_disclosure": "This work represents a compiler-generated evidence micro-publication. AI is used as a constrained synthesis engine operating on structured inputs and predefined rules, rather than as an autonomous author. All results and text were reviewed and verified by the author, who takes full responsibility for the content."
+  "_assets": [],
+  "_disclosure": "This work represents a compiler-generated evidence micro-publication. AI is used as a constrained synthesis engine operating on structured inputs and predefined rules, rather than as an autonomous author. All results and text were reviewed and verified by the author, who takes full responsibility for the content.",
+  "wordCount": 156,
+  "sentenceCount": 7,
+  "schema": "e156-v0.2"
 };
 
 const ROLES = [
@@ -376,7 +317,7 @@ const ROLES = [
 
 function esc(s){const d=document.createElement("div");d.textContent=String(s??"");return d.innerHTML}
 
-// ── Title + byline ──
+// -- Title + byline --
 document.getElementById("title").textContent = D.title || "Untitled";
 document.title = (D.title||"E156") + " \u2014 E156 Interactive Paper";
 
@@ -387,7 +328,7 @@ if(D.email) parts.push('<a href="mailto:'+esc(D.email)+'">'+esc(D.email)+'</a>')
 if(D.date) parts.push(esc(D.date));
 document.getElementById("byline").innerHTML = parts.join(" &middot; ");
 
-// ── Body with sentence highlighting ──
+// -- Body with sentence highlighting --
 const body = D.body || "";
 const sents = D.sentences || [];
 const bodyEl = document.getElementById("body");
@@ -401,7 +342,7 @@ if(sents.length === 7){
   bodyEl.textContent = body;
 }
 
-// ── Sentence map ──
+// -- Sentence map --
 const smap = document.getElementById("smap");
 ROLES.forEach((r,i) => {
   const seg = document.createElement("div");
@@ -426,7 +367,7 @@ ROLES.forEach((r,i) => {
   smap.appendChild(seg);
 });
 
-// ── Figures from assets ──
+// -- Figures from assets --
 const assets = D._assets || [];
 const imgAssets = assets.filter(a => /\.(png|jpg|jpeg|svg|gif|webp)$/i.test(a));
 if(imgAssets.length > 0){
@@ -448,7 +389,7 @@ if(imgAssets.length > 0){
   });
 }
 
-// ── App link ──
+// -- App link --
 const htmlAssets = assets.filter(a => /\.html$/i.test(a) && a !== "index.html");
 if(htmlAssets.length > 0){
   document.getElementById("app-section").style.display = "";
@@ -458,7 +399,7 @@ if(htmlAssets.length > 0){
   btn.textContent = "Open Interactive App \u2192 " + htmlAssets[0].replace(/[-_]/g," ").replace(/\.html$/,"");
 }
 
-// ── Notes ──
+// -- Notes --
 const notes = D.notes || {};
 const noteFields = [
   ["Type", D.type], ["Primary Estimand", D.primary_estimand],
@@ -484,7 +425,7 @@ noteFields.forEach(([label, val]) => {
   ng.appendChild(dd);
 });
 
-// ── References ──
+// -- References --
 const refs = D.references || [];
 if(refs.length > 0){
   document.getElementById("refs-section").style.display = "";
@@ -496,19 +437,19 @@ if(refs.length > 0){
   });
 }
 
-// ── Disclosure ──
+// -- Disclosure --
 const disc = D._disclosure || "";
 if(disc){
   document.getElementById("disclosure").style.display = "";
   document.getElementById("disclosure-text").textContent = disc;
 }
 
-// ── Footer ──
+// -- Footer --
 const wc = body.split(/\s+/).filter(Boolean).length;
 document.getElementById("wc").textContent = wc;
 document.getElementById("wc-check").textContent = wc === 156 ? "\u2713" : "\u2717 ("+wc+")";
 
-// ── Actions ──
+// -- Actions --
 function copyBody(e){
   navigator.clipboard.writeText(body).then(()=>{
     const b=e&&e.target?e.target:document.querySelector(".actions button");

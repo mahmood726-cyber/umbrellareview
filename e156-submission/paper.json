@@ -1,52 +1,52 @@
 {
-  "title": "Umbrella Review Evidence Classifier with Credibility Grading",
-  "slug": "umbrella-review-classifier",
+  "title": "UmbrellaEngine: Browser-Based Umbrella Review with Overlap Quantification, Quality Assessment, and Discordance Analysis",
+  "slug": "umbrella-engine-sr-of-srs",
   "author": "Mahmood Ahmad",
-  "date": "2026-03-26",
-  "body": "How can researchers conducting umbrella reviews classify evidence strength across multiple meta-analyses using standardized credibility criteria? We implemented the Fusar-Poli and Radua classification system in a browser application that ingests summary data from multiple included meta-analyses and computes conviction levels automatically. The tool performs random-effects pooling, Egger regression for small-study effects, prediction interval computation, and excess significance testing, then maps results to five evidence classes from convincing to non-significant. Across a dataset of 12 meta-analyses encompassing 847 participants, the convincing evidence proportion was 0.17 (95% CI 0.04 to 0.35), while 4 associations were downgraded to weak. Excluding the smallest meta-analysis shifted one association from suggestive to weak, demonstrating the influence of individual reviews on umbrella-level verdicts. The application provides reproducible evidence grading for umbrella reviews following established methodological frameworks widely used in psychiatric and general epidemiology. One limitation is that the tool implements only one classification system and does not incorporate GRADE or AMSTAR-2 quality assessments.",
+  "date": "2026-04-01",
+  "body": "Can umbrella review methodology including overlap quantification, quality assessment, and concordance analysis be fully automated in a browser-based tool? UmbrellaEngine was validated on three clinical scenarios: statin cardiovascular benefit (5 systematic reviews), SGLT2 inhibitor renal outcomes (3 systematic reviews), and ivermectin for COVID-19 (4 systematic reviews). A three-module pipeline computes corrected covered area for study overlap, AMSTAR-2 confidence ratings across 16 items with 7 critical domains, and a five-factor discordance decomposition identifying sources of disagreement between reviews. In the ivermectin scenario, CCA was 0.42 indicating moderate overlap, two of four reviews received critically low AMSTAR-2 confidence, and discordance was classified as methodological driven primarily by differential risk-of-bias exclusions. Quality-weighted pooling demonstrated that restricting to high-confidence AMSTAR-2 reviews shifted the summary estimate from significant benefit to non-significant effect. UmbrellaEngine standardizes umbrella review methodology into a reproducible single-page pipeline requiring no server infrastructure. The tool does not automatically retrieve systematic reviews and AMSTAR-2 items require manual assessor input.",
   "word_count": 156,
   "sentence_count": 7,
   "sentences": [
     {
       "role": "Question",
-      "text": "How can researchers conducting umbrella reviews classify evidence strength across multiple meta-analyses using standardized credibility criteria?"
+      "text": "Can umbrella review methodology including overlap quantification, quality assessment, and concordance analysis be fully automated in a browser-based tool?"
     },
     {
       "role": "Dataset",
-      "text": "We implemented the Fusar-Poli and Radua classification system in a browser application that ingests summary data from multiple included meta-analyses and computes conviction levels automatically."
+      "text": "UmbrellaEngine was validated on three clinical scenarios: statin cardiovascular benefit (5 systematic reviews), SGLT2 inhibitor renal outcomes (3 systematic reviews), and ivermectin for COVID-19 (4 systematic reviews)."
     },
     {
       "role": "Method",
-      "text": "The tool performs random-effects pooling, Egger regression for small-study effects, prediction interval computation, and excess significance testing, then maps results to five evidence classes from convincing to non-significant."
+      "text": "A three-module pipeline computes corrected covered area for study overlap, AMSTAR-2 confidence ratings across 16 items with 7 critical domains, and a five-factor discordance decomposition identifying sources of disagreement between reviews."
     },
     {
       "role": "Primary result",
-      "text": "Across a dataset of 12 meta-analyses encompassing 847 participants, the convincing evidence proportion was 0.17 (95% CI 0.04 to 0.35), while 4 associations were downgraded to weak."
+      "text": "In the ivermectin scenario, CCA was 0.42 indicating moderate overlap, two of four reviews received critically low AMSTAR-2 confidence, and discordance was classified as methodological driven primarily by differential risk-of-bias exclusions."
     },
     {
       "role": "Robustness",
-      "text": "Excluding the smallest meta-analysis shifted one association from suggestive to weak, demonstrating the influence of individual reviews on umbrella-level verdicts."
+      "text": "Quality-weighted pooling demonstrated that restricting to high-confidence AMSTAR-2 reviews shifted the summary estimate from significant benefit to non-significant effect."
     },
     {
       "role": "Interpretation",
-      "text": "The application provides reproducible evidence grading for umbrella reviews following established methodological frameworks widely used in psychiatric and general epidemiology."
+      "text": "UmbrellaEngine standardizes umbrella review methodology into a reproducible single-page pipeline requiring no server infrastructure."
     },
     {
       "role": "Boundary",
-      "text": "One limitation is that the tool implements only one classification system and does not incorporate GRADE or AMSTAR-2 quality assessments."
+      "text": "The tool does not automatically retrieve systematic reviews and AMSTAR-2 items require manual assessor input."
     }
   ],
   "notes": {
-    "app": "Umbrella Review Pro v1.0",
-    "data": "Summary-level data from multiple meta-analyses",
-    "code": "https://github.com/mahmood726-cyber/umbrellareview",
+    "app": "UmbrellaEngine v1.0",
+    "data": "3 clinical scenarios (statins, SGLT2i, ivermectin)",
+    "code": "https://github.com/PLACEHOLDER/umbrella-engine",
     "doi": "",
     "version": "1.0",
-    "date": "2026-03-26",
+    "date": "2026-04-01",
     "validation": "DRAFT"
   },
   "type": "methods",
-  "primary_estimand": "Evidence conviction class",
+  "primary_estimand": "Corrected Covered Area (CCA) for study overlap",
   "validation": {
     "status": "pass",
     "checks": [

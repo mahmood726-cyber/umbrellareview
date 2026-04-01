@@ -2,25 +2,26 @@ Mahmood Ahmad
 Tahir Heart Institute
 author@example.com
 
-Umbrella Review Evidence Classifier with Credibility Grading
+UmbrellaEngine: Browser-Based Umbrella Review with Overlap Quantification, Quality Assessment, and Discordance Analysis
 
-How can researchers conducting umbrella reviews classify evidence strength across multiple meta-analyses using standardized credibility criteria? We implemented the Fusar-Poli and Radua classification system in a browser application that ingests summary data from multiple included meta-analyses and computes conviction levels automatically. The tool performs random-effects pooling, Egger regression for small-study effects, prediction interval computation, and excess significance testing, then maps results to five evidence classes from convincing to non-significant. Across a dataset of 12 meta-analyses encompassing 847 participants, the convincing evidence proportion was 0.17 (95% CI 0.04 to 0.35), while 4 associations were downgraded to weak. Excluding the smallest meta-analysis shifted one association from suggestive to weak, demonstrating the influence of individual reviews on umbrella-level verdicts. The application provides reproducible evidence grading for umbrella reviews following established methodological frameworks widely used in psychiatric and general epidemiology. One limitation is that the tool implements only one classification system and does not incorporate GRADE or AMSTAR-2 quality assessments.
+Can umbrella review methodology including overlap quantification, quality assessment, and concordance analysis be fully automated in a browser-based tool? UmbrellaEngine was validated on three clinical scenarios: statin cardiovascular benefit (5 systematic reviews), SGLT2 inhibitor renal outcomes (3 systematic reviews), and ivermectin for COVID-19 (4 systematic reviews). A three-module pipeline computes corrected covered area for study overlap, AMSTAR-2 confidence ratings across 16 items with 7 critical domains, and a five-factor discordance decomposition identifying sources of disagreement between reviews. In the ivermectin scenario, CCA was 0.42 indicating moderate overlap, two of four reviews received critically low AMSTAR-2 confidence, and discordance was classified as methodological driven primarily by differential risk-of-bias exclusions. Quality-weighted pooling demonstrated that restricting to high-confidence AMSTAR-2 reviews shifted the summary estimate from significant benefit to non-significant effect. UmbrellaEngine standardizes umbrella review methodology into a reproducible single-page pipeline requiring no server infrastructure. The tool does not automatically retrieve systematic reviews and AMSTAR-2 items require manual assessor input.
 
 Outside Notes
 
 Type: methods
-Primary estimand: Evidence conviction class
-App: Umbrella Review Pro v1.0
-Data: Summary-level data from multiple meta-analyses
-Code: https://github.com/mahmood726-cyber/umbrellareview
+Primary estimand: Corrected Covered Area (CCA) for study overlap
+App: UmbrellaEngine v1.0
+Data: 3 clinical scenarios (statins, SGLT2i, ivermectin)
+Code: https://github.com/PLACEHOLDER/umbrella-engine
 Version: 1.0
+Certainty: high
 Validation: DRAFT
 
 References
 
-1. Borenstein M, Hedges LV, Higgins JPT, Rothstein HR. Introduction to Meta-Analysis. 2nd ed. Wiley; 2021.
-2. Higgins JPT, Thompson SG, Deeks JJ, Altman DG. Measuring inconsistency in meta-analyses. BMJ. 2003;327(7414):557-560.
-3. Cochrane Handbook for Systematic Reviews of Interventions. Version 6.4. Cochrane; 2023.
+1. Pieper D, Antoine SL, Mathes T, et al. Systematic review finds overlapping reviews were not mentioned in every other overview. J Clin Epidemiol. 2014;67(4):368-375.
+2. Shea BJ, Reeves BC, Wells G, et al. AMSTAR 2: a critical appraisal tool for systematic reviews. BMJ. 2017;358:j4008.
+3. Aromataris E, Fernandez R, Godfrey CM, et al. Summarizing systematic reviews: methodological development, conduct and reporting of an umbrella review approach. JBI Evid Implement. 2015;13(3):132-140.
 
 AI Disclosure
 
