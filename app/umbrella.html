@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UmbrellaEngine - Systematic Review of Systematic Reviews</title>
+<script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+<style>
+/* ===== CSS Variables / Design System ===== */
+:root {
+  --primary: #0f766e;
+  --primary-light: #14b8a6;
+  --primary-dark: #0d5c56;
+  --bg: #ffffff;
+  --bg-alt: #f8fafc;
+  --bg-card: #ffffff;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #2563eb;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.12);
+  --radius: 8px;
+  --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "Cascadia Code", "Fira Code", monospace;
+  --gradient: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+}
+
+body.dark {
+  --bg: #0f172a;
+  --bg-alt: #1e293b;
+  --bg-card: #1e293b;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ===== Header ===== */
+.app-header {
+  background: var(--gradient);
+  color: #fff;
+  padding: 1.25rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-lg);
+}
+.app-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.app-header .subtitle {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-top: 0.15rem;
+}
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.dark-toggle {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: var(--font);
+  transition: background 0.2s;
+}
+.dark-toggle:hover, .dark-toggle:focus { background: rgba(255,255,255,0.25); outline: none; }
+
+/* ===== Tab Navigation ===== */
+.tab-bar {
+  display: flex;
+  background: var(--bg-alt);
+  border-bottom: 2px solid var(--border);
+  padding: 0 1rem;
+  overflow-x: auto;
+}
+.tab-btn {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--primary); }
+.tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+.tab-btn:focus { outline: 2px solid var(--primary-light); outline-offset: -2px; }
+
+/* ===== Tab Content ===== */
+.tab-content { display: none; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; }
+.tab-content.active { display: block; }
+
+/* ===== Cards ===== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.card h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--primary);
+}
+.card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* ===== Badges ===== */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.badge-high { background: #dcfce7; color: #166534; }
+.badge-moderate { background: #fef3c7; color: #92400e; }
+.badge-low { background: #fed7aa; color: #9a3412; }
+.badge-critically-low { background: #fecaca; color: #991b1b; }
+.badge-slight { background: #dbeafe; color: #1e40af; }
+.badge-concordant { background: #dcfce7; color: #166534; }
+.badge-minor { background: #fef3c7; color: #92400e; }
+.badge-major { background: #fed7aa; color: #9a3412; }
+.badge-contradictory { background: #fecaca; color: #991b1b; }
+.badge-pass { background: #dcfce7; color: #166534; }
+.badge-warn { background: #fef3c7; color: #92400e; }
+.badge-reject { background: #fecaca; color: #991b1b; }
+body.dark .badge-high { background: #166534; color: #dcfce7; }
+body.dark .badge-moderate { background: #92400e; color: #fef3c7; }
+body.dark .badge-low { background: #9a3412; color: #fed7aa; }
+body.dark .badge-critically-low { background: #991b1b; color: #fecaca; }
+body.dark .badge-slight { background: #1e40af; color: #dbeafe; }
+body.dark .badge-concordant { background: #166534; color: #dcfce7; }
+body.dark .badge-minor { background: #92400e; color: #fef3c7; }
+body.dark .badge-major { background: #9a3412; color: #fed7aa; }
+body.dark .badge-contradictory { background: #991b1b; color: #fecaca; }
+body.dark .badge-pass { background: #166534; color: #dcfce7; }
+body.dark .badge-warn { background: #92400e; color: #fef3c7; }
+body.dark .badge-reject { background: #991b1b; color: #fecaca; }
+
+/* ===== Forms ===== */
+.form-group { margin-bottom: 0.75rem; }
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: var(--text);
+}
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(15,118,110,0.15);
+}
+.form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; }
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn:active { transform: scale(0.97); }
+.btn:focus { outline: 2px solid var(--primary-light); outline-offset: 2px; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: var(--bg-alt); color: var(--text); border-color: var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #b91c1c; }
+.btn-sm { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+.btn-group { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+
+/* ===== Tables ===== */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.data-table th, .data-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.data-table th {
+  font-weight: 600;
+  background: var(--bg-alt);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.data-table tr:hover { background: var(--bg-alt); }
+
+/* ===== AMSTAR Grid ===== */
+.amstar-grid {
+  display: grid;
+  gap: 2px;
+  overflow-x: auto;
+}
+.amstar-cell {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 4px;
+}
+.amstar-cell.yes { background: #16a34a; color: #fff; }
+.amstar-cell.partial { background: #d97706; color: #fff; }
+.amstar-cell.no { background: #dc2626; color: #fff; }
+.amstar-cell.na { background: #94a3b8; color: #fff; }
+.amstar-cell.critical { box-shadow: inset 0 0 0 2px #1e293b; }
+body.dark .amstar-cell.critical { box-shadow: inset 0 0 0 2px #f1f5f9; }
+.amstar-header { font-size: 0.7rem; font-weight: 600; padding: 0.25rem; text-align: center; color: var(--text-muted); }
+
+/* ===== Stats Grid ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.stat-card {
+  background: var(--bg-alt);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+}
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* ===== Plotly Container ===== */
+.plot-container {
+  width: 100%;
+  min-height: 350px;
+  margin: 1rem 0;
+}
+
+/* ===== Report ===== */
+.report-text {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.7;
+}
+.report-json {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  max-height: 400px;
+  overflow: auto;
+  white-space: pre;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .app-header { padding: 1rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+  .tab-content { padding: 1rem; }
+  .form-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===== Utility ===== */
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); }
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="app-header" role="banner">
+  <div>
+    <h1>UmbrellaEngine</h1>
+    <div class="subtitle">Systematic Review of Systematic Reviews</div>
+  </div>
+  <div class="header-controls">
+    <button class="dark-toggle" id="darkToggleBtn" aria-label="Toggle dark mode" title="Toggle dark mode">Dark Mode</button>
+  </div>
+</header>
+
+<!-- ===== Tab Bar ===== -->
+<nav class="tab-bar" role="tablist" aria-label="Analysis sections">
+  <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-input" id="tabBtn-input" data-tab="input">Input</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-overlap" id="tabBtn-overlap" data-tab="overlap">Overlap</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-quality" id="tabBtn-quality" data-tab="quality">Quality</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-effects" id="tabBtn-effects" data-tab="effects">Effects</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-discordance" id="tabBtn-discordance" data-tab="discordance">Discordance</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-report" id="tabBtn-report" data-tab="report">Report &amp; Certify</button>
+</nav>
+
+<!-- ===== Tab 1: Input ===== -->
+<div class="tab-content active" id="tab-input" role="tabpanel" aria-labelledby="tabBtn-input">
+  <div class="card">
+    <h2>Load Built-in Example</h2>
+    <div class="btn-group">
+      <button class="btn btn-secondary" id="loadStatinsBtn">Statins (5 SRs)</button>
+      <button class="btn btn-secondary" id="loadSglt2iBtn">SGLT2i in HF (3 SRs)</button>
+      <button class="btn btn-secondary" id="loadIvermectinBtn">Ivermectin (4 SRs)</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Add Review</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="inp-reviewId">Review ID</label>
+        <input type="text" id="inp-reviewId" placeholder="e.g. Smith2022">
+      </div>
+      <div class="form-group">
+        <label for="inp-label">Label</label>
+        <input type="text" id="inp-label" placeholder="e.g. Smith 2022">
+      </div>
+      <div class="form-group">
+        <label for="inp-year">Year</label>
+        <input type="number" id="inp-year" value="2024" min="1990" max="2030">
+      </div>
+      <div class="form-group">
+        <label for="inp-measure">Effect Measure</label>
+        <select id="inp-measure">
+          <option value="logOR">log OR</option>
+          <option value="logRR">log RR</option>
+          <option value="logHR">log HR</option>
+          <option value="SMD">SMD</option>
+          <option value="MD">MD</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="inp-theta">Pooled Effect (log scale)</label>
+        <input type="number" step="any" id="inp-theta" placeholder="-0.30">
+      </div>
+      <div class="form-group">
+        <label for="inp-ciLo">CI Lower</label>
+        <input type="number" step="any" id="inp-ciLo" placeholder="-0.45">
+      </div>
+      <div class="form-group">
+        <label for="inp-ciHi">CI Upper</label>
+        <input type="number" step="any" id="inp-ciHi" placeholder="-0.15">
+      </div>
+      <div class="form-group">
+        <label for="inp-k">Number of Studies (k)</label>
+        <input type="number" id="inp-k" placeholder="10" min="1">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="inp-studyIds">Study IDs (comma-separated)</label>
+      <input type="text" id="inp-studyIds" placeholder="WOSCOPS, AFCAPS, ASCOT, ...">
+    </div>
+    <div class="form-group">
+      <label for="inp-scopeTags">Scope Tags (comma-separated)</label>
+      <input type="text" id="inp-scopeTags" placeholder="adults, RCTs, mortality">
+    </div>
+
+    <details class="mt-2">
+      <summary style="cursor:pointer;font-weight:600;color:var(--primary);">AMSTAR-2 Items (16)</summary>
+      <div class="form-row mt-1" id="amstarFormGrid"></div>
+    </details>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" id="addReviewBtn">Add Review</button>
+      <button class="btn btn-danger" id="clearAllBtn">Clear All</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Import CSV / JSON</h2>
+    <div class="form-group">
+      <label for="inp-import">Paste CSV or JSON data</label>
+      <textarea id="inp-import" rows="4" placeholder='Paste JSON: {"name":"...","reviews":[...]} or CSV with headers: review_id,theta,ci_lo,ci_hi,k,...'></textarea>
+    </div>
+    <button class="btn btn-secondary" id="importBtn">Import</button>
+  </div>
+
+  <div class="card">
+    <h2>Current Reviews (<span id="reviewCountBadge">0</span>)</h2>
+    <div style="overflow-x:auto;">
+      <table class="data-table" id="reviewsTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>Label</th><th>Year</th><th>Measure</th>
+            <th>Effect</th><th>CI</th><th>k</th><th>Studies</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="reviewsTableBody"></tbody>
+      </table>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="runAnalysisBtn" disabled>Run Analysis</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Tab 2: Overlap ===== -->
+<div class="tab-content" id="tab-overlap" role="tabpanel" aria-labelledby="tabBtn-overlap">
+  <div class="card">
+    <h2>Study Overlap</h2>
+    <div class="stats-grid" id="overlapStats"></div>
+    <div class="plot-container" id="overlapHeatmap" role="img" aria-label="Overlap heatmap"></div>
+  </div>
+  <div class="card">
+    <h2>Study Frequency</h2>
+    <div class="plot-container" id="studyFreqChart" role="img" aria-label="Study frequency bar chart"></div>
+    <div id="studyFreqTable" class="mt-2"></div>
+  </div>
+</div>
+
+<!-- ===== Tab 3: Quality ===== -->
+<div class="tab-content" id="tab-quality" role="tabpanel" aria-labelledby="tabBtn-quality">
+  <div class="card">
+    <h2>AMSTAR-2 Quality Assessment</h2>
+    <div class="stats-grid" id="qualityStats"></div>
+    <div id="amstarTrafficLight" class="mt-2"></div>
+    <div class="plot-container" id="amstarPlot" role="img" aria-label="AMSTAR-2 traffic light chart"></div>
+  </div>
+</div>
+
+<!-- ===== Tab 4: Effects ===== -->
+<div class="tab-content" id="tab-effects" role="tabpanel" aria-labelledby="tabBtn-effects">
+  <div class="card">
+    <h2>Effect Concordance</h2>
+    <div class="stats-grid" id="effectsStats"></div>
+    <div class="plot-container" id="forestPlot" role="img" aria-label="Forest of forests plot"></div>
+  </div>
+</div>
+
+<!-- ===== Tab 5: Discordance ===== -->
+<div class="tab-content" id="tab-discordance" role="tabpanel" aria-labelledby="tabBtn-discordance">
+  <div class="card">
+    <h2>Discordance Analysis</h2>
+    <div class="stats-grid" id="discordanceStats"></div>
+    <div class="plot-container" id="waterfallChart" role="img" aria-label="Discordance waterfall chart"></div>
+    <div id="discordanceDetail" class="mt-2"></div>
+  </div>
+</div>
+
+<!-- ===== Tab 6: Report & Certify ===== -->
+<div class="tab-content" id="tab-report" role="tabpanel" aria-labelledby="tabBtn-report">
+  <div class="card">
+    <h2>Structured Report</h2>
+    <div class="report-text" id="reportText">Run analysis to generate report.</div>
+  </div>
+  <div class="card">
+    <h2>Methods Paragraph</h2>
+    <div class="report-text" id="methodsParagraph">Run analysis to generate methods paragraph.</div>
+  </div>
+  <div class="card">
+    <h2>TruthCert Bundle</h2>
+    <div class="report-json" id="truthCertJson">{}</div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="exportJsonBtn" disabled>Export JSON</button>
+      <button class="btn btn-secondary" id="copyJsonBtn" disabled>Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   UmbrellaEngine - Browser Application
+   All Python engine logic ported to JavaScript
+   ============================================================ */
+
+// ===== xoshiro128** Seeded PRNG =====
+function xoshiro128ss(seed) {
+  let s = [seed >>> 0, (seed * 1597334677) >>> 0, (seed * 2246822519) >>> 0, (seed * 3266489917) >>> 0];
+  if (s[0] === 0 && s[1] === 0 && s[2] === 0 && s[3] === 0) s[0] = 1;
+  function rotl(x, k) { return ((x << k) | (x >>> (32 - k))) >>> 0; }
+  return function() {
+    const result = (rotl((s[1] * 5) >>> 0, 7) * 9) >>> 0;
+    const t = (s[1] << 9) >>> 0;
+    s[2] ^= s[0]; s[3] ^= s[1]; s[1] ^= s[2]; s[0] ^= s[3];
+    s[2] ^= t; s[3] = rotl(s[3], 11);
+    return result / 4294967296;
+  };
+}
+
+// ===== HTML Escaping =====
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ===== Utility =====
+function safeNum(v, fallback) { const n = parseFloat(v); return Number.isFinite(n) ? n : fallback; }
+function roundN(v, d) { const f = Math.pow(10, d); return Math.round(v * f) / f; }
+function sha256Hex(str) {
+  // Simple hash for browser (not cryptographic, but deterministic)
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + ch;
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(16).padStart(16, '0').slice(0, 16);
+}
+
+// ===== Constants =====
+const CRITICAL_ITEMS = new Set(['1', '2', '4', '7', '9', '11', '13']);
+const ALL_ITEMS = Array.from({length: 16}, (_, i) => String(i + 1));
+const AMSTAR_LABELS = [
+  'PICO components', 'Protocol registered', 'Study design explained',
+  'Comprehensive search', 'Duplicate selection', 'Duplicate extraction',
+  'Excluded studies listed', 'Adequate detail', 'RoB assessment',
+  'Funding reported', 'Statistical methods', 'RoB impact assessed',
+  'RoB discussed', 'Heterogeneity discussed', 'Pub bias investigated',
+  'COI declared'
+];
+const AMSTAR_WEIGHTS = { 'High': 1.0, 'Moderate': 0.75, 'Low': 0.5, 'Critically Low': 0.25 };
+const GROOVE_LABELS = { 'Slight': 'Slight', 'Moderate': 'Moderate', 'High': 'High', 'Very High': 'Very High' };
+
+// ===== State =====
+let reviews = [];
+let analysisResult = null;
+
+// ===== Built-in Example Data =====
+const EXAMPLES = {
+  statins: {
+    name: "Statins for Primary CV Prevention",
+    reviews: [
+      { review_id: "CTT2012", theta: -0.3147, ci_lo: -0.4005, ci_hi: -0.2231, k: 27, measure: "logOR", year: 2012, label: "CTT 2012",
+        study_ids: ["4S","WOSCOPS","CARE","LIPID","AFCAPS","HPS","PROSPER","ALLHAT","ASCOT","CARDS","TNT","IDEAL","SPARCL","JUPITER","SHARP","MEGA","ALERT","AURORA","GISSI-HF","CORONA","A2Z","PROVE-IT","SEARCH","ACCORD","AIM-HIGH","dal-OUTCOMES","ASPEN"],
+        scope_tags: ["adults","primary+secondary","mortality","RCTs"],
+        amstar_items: {"1":"yes","2":"yes","3":"yes","4":"yes","5":"yes","6":"yes","7":"yes","8":"yes","9":"yes","10":"yes","11":"yes","12":"yes","13":"yes","14":"yes","15":"yes","16":"yes"} },
+      { review_id: "Ray2010", theta: -0.0943, ci_lo: -0.1863, ci_hi: 0.0100, k: 11, measure: "logRR", year: 2010, label: "Ray 2010",
+        study_ids: ["WOSCOPS","AFCAPS","ASCOT","MEGA","JUPITER","ALLHAT","PROSPER","HPS","CARDS","HYVET","ASPEN"],
+        scope_tags: ["adults","primary_only","all_cause_mortality","RCTs"],
+        amstar_items: {"1":"yes","2":"no","3":"yes","4":"yes","5":"yes","6":"yes","7":"no","8":"yes","9":"yes","10":"no","11":"yes","12":"yes","13":"yes","14":"yes","15":"yes","16":"yes"} },
+      { review_id: "Taylor2013", theta: -0.1508, ci_lo: -0.2357, ci_hi: -0.0619, k: 18, measure: "logRR", year: 2013, label: "Taylor 2013",
+        study_ids: ["WOSCOPS","AFCAPS","ASCOT","MEGA","JUPITER","ALLHAT","CARDS","HYVET","PREVEND-IT","CAIUS","KAPS","ACAPS","BCAPS","PHYLLIS","FAST","ASPEN","HOPE-3","TRACE-RA"],
+        scope_tags: ["adults","primary_only","CV_events","RCTs"],
+        amstar_items: {"1":"yes","2":"yes","3":"yes","4":"yes","5":"yes","6":"yes","7":"yes","8":"yes","9":"yes","10":"yes","11":"yes","12":"yes","13":"yes","14":"yes","15":"yes","16":"yes"} },
+      { review_id: "Tonelli2011", theta: -0.1625, ci_lo: -0.2614, ci_hi: -0.0513, k: 9, measure: "logRR", year: 2011, label: "Tonelli 2011",
+        study_ids: ["WOSCOPS","AFCAPS","ASCOT","MEGA","JUPITER","ALLHAT","CARDS","PROSPER","HPS"],
+        scope_tags: ["adults","primary_only","CV_events","RCTs"],
+        amstar_items: {"1":"yes","2":"no","3":"yes","4":"yes","5":"yes","6":"no","7":"no","8":"yes","9":"yes","10":"yes","11":"yes","12":"no","13":"yes","14":"yes","15":"no","16":"yes"} },
+      { review_id: "Chou2022", theta: -0.1985, ci_lo: -0.3011, ci_hi: -0.1054, k: 23, measure: "logRR", year: 2022, label: "Chou 2022",
+        study_ids: ["WOSCOPS","AFCAPS","ASCOT","MEGA","JUPITER","ALLHAT","CARDS","PROSPER","HPS","HOPE-3","HYVET","PREVEND-IT","TRACE-RA","4S","CARE","LIPID","TNT","IDEAL","SPARCL","SHARP","CORONA","GISSI-HF","AURORA"],
+        scope_tags: ["adults","primary+secondary","CV_events","RCTs"],
+        amstar_items: {"1":"yes","2":"yes","3":"yes","4":"yes","5":"yes","6":"yes","7":"yes","8":"yes","9":"yes","10":"yes","11":"yes","12":"yes","13":"yes","14":"yes","15":"yes","16":"yes"} }
+    ]
+  },
+  sglt2i: {
+    name: "SGLT2i in Heart Failure",
+    reviews: [
+      { review_id: "Zannad2020", theta: -0.4005, ci_lo: -0.5447, ci_hi: -0.2485, k: 4, measure: "logHR", year: 2020, label: "Zannad 2020",
+        study_ids: ["DAPA-HF","EMPEROR-Reduced","SOLOIST-WHF","SCORED"],
+        scope_tags: ["adults","HFrEF","CV_death_HF_hosp","RCTs"],
+        amstar_items: {"1":"yes","2":"yes","3":"yes","4":"yes","5":"yes","6":"yes","7":"yes","8":"yes","9":"yes","10":"yes","11":"yes","12":"yes","13":"yes","14":"yes","15":"partial","16":"yes"} },
+      { review_id: "Vaduganathan2022", theta: -0.3567, ci_lo: -0.4620, ci_hi: -0.2485, k: 6, measure: "logHR", year: 2022, label: "Vaduganathan 2022",
+        study_ids: ["DAPA-HF","EMPEROR-Reduced","DELIVER","SOLOIST-WHF","EMPEROR-Preserved","SCORED"],
+        scope_tags: ["adults","HFrEF+HFpEF","CV_death_HF_hosp","RCTs"],
+        amstar_items: {"1":"yes","2":"yes","3":"yes","4":"yes","5":"yes","6":"yes","7":"yes","8":"yes","9":"yes","10":"yes","11":"yes","12":"yes","13":"yes","14":"yes","15":"yes","16":"yes"} },
+      { review_id: "McGuire2021", theta: -0.3857, ci_lo: -0.5108, ci_hi: -0.2614, k: 5, measure: "logHR", year: 2021, label: "McGuire 2021",
+        study_ids: ["DAPA-HF","EMPEROR-Reduced","SOLOIST-WHF","SCORED","VERTIS-CV"],
+        scope_tags: ["adults","HFrEF","CV_death_HF_hosp","RCTs"],
+        amstar_items: {"1":"yes","2":"yes","3":"yes","4":"yes","5":"yes","6":"yes","7":"partial","8":"yes","9":"yes","10":"yes","11":"yes","12":"yes","13":"yes","14":"yes","15":"yes","16":"yes"} }
+    ]
+  },
+  ivermectin: {
+    name: "Ivermectin for COVID-19",
+    reviews: [
+      { review_id: "Hill2021", theta: -0.9676, ci_lo: -1.6607, ci_hi: -0.3147, k: 15, measure: "logOR", year: 2021, label: "Hill 2021",
+        study_ids: ["Elgazzar","Niaee","Ahmed","Chaccour","Babalola","Hashim","Mahmud","Ravikirti","Chahla","Lopez-Medina","Okumus","Podder","Gonzalez","Krolewiecki","Mohan"],
+        scope_tags: ["adults","COVID_inpatient+outpatient","mortality","RCTs"],
+        amstar_items: {"1":"yes","2":"no","3":"no","4":"partial","5":"no","6":"no","7":"no","8":"partial","9":"no","10":"no","11":"no","12":"no","13":"no","14":"partial","15":"no","16":"yes"} },
+      { review_id: "Roman2022", theta: -0.1054, ci_lo: -0.5621, ci_hi: 0.3507, k: 10, measure: "logRR", year: 2022, label: "Roman 2022",
+        study_ids: ["Ahmed","Chaccour","Lopez-Medina","Ravikirti","Chahla","Vallejos","Reis","TOGETHER","Abd-Elsalam","Lim"],
+        scope_tags: ["adults","COVID_outpatient","mortality","RCTs"],
+        amstar_items: {"1":"yes","2":"yes","3":"yes","4":"yes","5":"yes","6":"yes","7":"yes","8":"yes","9":"yes","10":"yes","11":"yes","12":"yes","13":"yes","14":"yes","15":"yes","16":"yes"} },
+      { review_id: "Popp2022", theta: -0.4005, ci_lo: -0.9163, ci_hi: 0.1133, k: 14, measure: "logRR", year: 2022, label: "Popp 2022 (Cochrane)",
+        study_ids: ["Ahmed","Chaccour","Lopez-Medina","Ravikirti","Chahla","Vallejos","Reis","TOGETHER","Abd-Elsalam","Lim","Hashim","Mahmud","Okumus","Gonzalez"],
+        scope_tags: ["adults","COVID_inpatient+outpatient","mortality","RCTs"],
+        amstar_items: {"1":"yes","2":"yes","3":"yes","4":"yes","5":"yes","6":"yes","7":"yes","8":"yes","9":"yes","10":"yes","11":"yes","12":"yes","13":"yes","14":"yes","15":"yes","16":"yes"} },
+      { review_id: "Bryant2021", theta: -1.1712, ci_lo: -1.9661, ci_hi: -0.4308, k: 24, measure: "logOR", year: 2021, label: "Bryant 2021",
+        study_ids: ["Elgazzar","Niaee","Ahmed","Chaccour","Babalola","Hashim","Mahmud","Ravikirti","Chahla","Lopez-Medina","Okumus","Podder","Gonzalez","Krolewiecki","Mohan","Vallejos","Reis","Abd-Elsalam","Lim","Carvallo","Shouman","Alam","Chowdhury","Bukhari"],
+        scope_tags: ["adults","COVID_inpatient+outpatient","mortality","RCTs+observational"],
+        amstar_items: {"1":"yes","2":"no","3":"no","4":"partial","5":"yes","6":"no","7":"no","8":"partial","9":"no","10":"no","11":"partial","12":"no","13":"partial","14":"yes","15":"no","16":"yes"} }
+    ]
+  }
+};
+
+// ===== Core Engine Functions (ported from Python) =====
+
+function classifyGroove(cca) {
+  if (cca < 0.05) return 'Slight';
+  if (cca < 0.10) return 'Moderate';
+  if (cca < 0.15) return 'High';
+  return 'Very High';
+}
+
+function computeOverlap(revs) {
+  const c = revs.length;
+  if (c < 2) {
+    return { cca: 0, groove: 'Slight', n_total_citations: 0, n_unique_studies: 0,
+             n_reviews: c, overlap_matrix: [], study_frequency: {} };
+  }
+  const sets = revs.map(r => new Set(r.study_ids || []));
+  const allStudies = new Set();
+  sets.forEach(s => s.forEach(id => allStudies.add(id)));
+  const r = allStudies.size;
+  let nTotal = 0;
+  sets.forEach(s => nTotal += s.size);
+  const denom = r * c - r;
+  let cca = denom > 0 ? (nTotal - r) / denom : 0;
+  cca = Math.max(0, Math.min(1, cca));
+
+  // Pairwise overlap matrix
+  const matrix = [];
+  for (let i = 0; i < c; i++) {
+    matrix[i] = [];
+    for (let j = 0; j < c; j++) {
+      let count = 0;
+      sets[j].forEach(sid => { if (sets[i].has(sid)) count++; });
+      matrix[i][j] = count;
+    }
+  }
+
+  // Study frequency
+  const freq = {};
+  allStudies.forEach(sid => {
+    let cnt = 0;
+    sets.forEach(s => { if (s.has(sid)) cnt++; });
+    freq[sid] = cnt;
+  });
+
+  return {
+    cca: roundN(cca, 4),
+    groove: classifyGroove(cca),
+    n_total_citations: nTotal,
+    n_unique_studies: r,
+    n_reviews: c,
+    overlap_matrix: matrix,
+    study_frequency: freq
+  };
+}
+
+function scoreAmstar(reviewId, items) {
+  let nYes = 0, nCriticalYes = 0, nCriticalFlaw = 0, nNoncriticalWeakness = 0;
+  for (const [k, v] of Object.entries(items)) {
+    if (v === 'yes') nYes++;
+    if (CRITICAL_ITEMS.has(k) && v === 'yes') nCriticalYes++;
+    if (CRITICAL_ITEMS.has(k) && v === 'no') nCriticalFlaw++;
+    if (!CRITICAL_ITEMS.has(k) && v !== 'yes') nNoncriticalWeakness++;
+  }
+  let confidence;
+  if (nCriticalFlaw === 0) {
+    confidence = nNoncriticalWeakness <= 1 ? 'High' : 'Moderate';
+  } else if (nCriticalFlaw === 1) {
+    confidence = 'Low';
+  } else {
+    confidence = 'Critically Low';
+  }
+  return {
+    review_id: reviewId,
+    item_scores: Object.assign({}, items),
+    n_yes: nYes,
+    n_critical_yes: nCriticalYes,
+    n_critical_flaw: nCriticalFlaw,
+    confidence: confidence
+  };
+}
+
+function computeConcordance(revs) {
+  const n = revs.length;
+  const thetas = revs.map(r => r.theta);
+  const ses = revs.map(r => {
+    if (Number.isFinite(r.se) && r.se > 0) return r.se;
+    if (Number.isFinite(r.ci_lo) && Number.isFinite(r.ci_hi) && r.ci_lo !== 0 && r.ci_hi !== 0) {
+      return (r.ci_hi - r.ci_lo) / (2 * 1.96);
+    }
+    return 0.1;
+  });
+
+  // Direction agreement
+  const sorted = thetas.slice().sort((a, b) => a - b);
+  const median = sorted.length % 2 === 0
+    ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+    : sorted[Math.floor(sorted.length / 2)];
+  let majoritySign = Math.sign(median);
+  if (majoritySign === 0) majoritySign = -1;
+  let agree = 0;
+  thetas.forEach(t => { if (Math.sign(t) === majoritySign) agree++; });
+  const directionAgreement = agree / n;
+
+  // All significant?
+  const ciLos = revs.map(r => r.ci_lo);
+  const ciHis = revs.map(r => r.ci_hi);
+  const allSig = revs.every(r => r.ci_lo > 0 || r.ci_hi < 0);
+
+  // CI overlap fraction
+  let overlapCount = 0, pairCount = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const lo = Math.max(ciLos[i], ciLos[j]);
+      const hi = Math.min(ciHis[i], ciHis[j]);
+      if (lo < hi) overlapCount++;
+      pairCount++;
+    }
+  }
+  const ciOverlap = pairCount > 0 ? overlapCount / pairCount : 1.0;
+
+  // Meta-meta-analysis
+  const w = ses.map(s => 1.0 / (s * s));
+  const sumW = w.reduce((a, b) => a + b, 0);
+  let metaTheta = 0;
+  for (let i = 0; i < n; i++) metaTheta += w[i] * thetas[i];
+  metaTheta /= sumW;
+  const metaSe = 1.0 / Math.sqrt(sumW);
+  let q = 0;
+  for (let i = 0; i < n; i++) q += w[i] * Math.pow(thetas[i] - metaTheta, 2);
+  let i2 = (q > 0 && n > 1) ? Math.max(0, (q - (n - 1)) / q * 100) : 0;
+
+  // Quality-weighted
+  const amstarW = revs.map(r => {
+    if (r.amstar_items && Object.keys(r.amstar_items).length > 0) {
+      const res = scoreAmstar(r.review_id, r.amstar_items);
+      return AMSTAR_WEIGHTS[res.confidence] ?? 0.5;
+    }
+    return 0.5;
+  });
+  const wAdj = ses.map((s, idx) => amstarW[idx] / (s * s));
+  const sumWAdj = wAdj.reduce((a, b) => a + b, 0);
+  let qwTheta = 0;
+  for (let i = 0; i < n; i++) qwTheta += wAdj[i] * thetas[i];
+  qwTheta /= sumWAdj;
+  const qwSe = 1.0 / Math.sqrt(sumWAdj);
+  const qwCi = [qwTheta - 1.96 * qwSe, qwTheta + 1.96 * qwSe];
+
+  const minT = Math.min(...thetas);
+  const maxT = Math.max(...thetas);
+
+  return {
+    direction_agreement: roundN(directionAgreement, 3),
+    all_significant: allSig,
+    ci_overlap_fraction: roundN(ciOverlap, 3),
+    meta_meta_theta: roundN(metaTheta, 4),
+    meta_meta_se: roundN(metaSe, 4),
+    meta_meta_i2: roundN(i2, 1),
+    range_theta: [roundN(minT, 4), roundN(maxT, 4)],
+    quality_weighted_theta: roundN(qwTheta, 4),
+    quality_weighted_ci: [roundN(qwCi[0], 4), roundN(qwCi[1], 4)]
+  };
+}
+
+function scopeDivergence(revs) {
+  if (revs.length < 2) return 0;
+  const tags = revs.map(r => new Set(r.scope_tags || []));
+  const dists = [];
+  for (let i = 0; i < tags.length; i++) {
+    for (let j = i + 1; j < tags.length; j++) {
+      const union = new Set([...tags[i], ...tags[j]]);
+      let inter = 0;
+      tags[i].forEach(t => { if (tags[j].has(t)) inter++; });
+      dists.push(union.size === 0 ? 0 : 1.0 - inter / union.size);
+    }
+  }
+  return dists.length > 0 ? dists.reduce((a, b) => a + b, 0) / dists.length : 0;
+}
+
+function inclusionDivergence(revs) {
+  const ks = revs.filter(r => r.k > 0).map(r => r.k);
+  if (ks.length < 2) return 0;
+  const ratio = Math.max(...ks) / Math.min(...ks);
+  return Math.min(1.0, (ratio - 1.0) / 3.0);
+}
+
+function qualityDivergence(revs) {
+  const levels = { 'High': 4, 'Moderate': 3, 'Low': 2, 'Critically Low': 1 };
+  const scores = revs.map(r => {
+    if (r.amstar_items && Object.keys(r.amstar_items).length > 0) {
+      const res = scoreAmstar(r.review_id, r.amstar_items);
+      return levels[res.confidence] ?? 2;
+    }
+    return 2;
+  });
+  if (scores.length < 2) return 0;
+  return (Math.max(...scores) - Math.min(...scores)) / 3.0;
+}
+
+function methodDivergence(revs) {
+  const measures = new Set(revs.map(r => r.measure));
+  if (measures.size <= 1) return 0;
+  return Math.min(1.0, (measures.size - 1) / 2.0);
+}
+
+function computeDiscordance(revs, overlap, concordance) {
+  const dirAgree = concordance.direction_agreement;
+  const i2 = concordance.meta_meta_i2;
+  const sigPositive = revs.filter(r => r.ci_lo > 0).length;
+  const sigNegative = revs.filter(r => r.ci_hi < 0).length;
+  const contradictory = sigPositive > 0 && sigNegative > 0;
+
+  let overall;
+  if (contradictory) {
+    overall = 'Contradictory';
+  } else if (dirAgree < 1.0 || i2 > 50) {
+    overall = 'Major';
+  } else if (concordance.ci_overlap_fraction < 1.0) {
+    overall = 'Minor';
+  } else {
+    overall = 'Concordant';
+  }
+
+  const scopeD = scopeDivergence(revs);
+  const inclusionD = inclusionDivergence(revs);
+  const overlapD = 1.0 - overlap.cca;
+  const qualityD = qualityDivergence(revs);
+  const methodD = methodDivergence(revs);
+
+  const raw = [
+    { name: 'Scope differences', score: scopeD, desc: 'Reviews differ in population, intervention, or outcome definitions' },
+    { name: 'Inclusion criteria', score: inclusionD, desc: 'Reviews include different numbers of studies (k ratio)' },
+    { name: 'Evidence base', score: overlapD, desc: 'Reviews analyse largely different primary studies (low CCA)' },
+    { name: 'Quality variation', score: qualityD, desc: 'Reviews vary in AMSTAR-2 confidence rating' },
+    { name: 'Statistical methods', score: methodD, desc: 'Reviews use different effect measures or pooling methods' }
+  ];
+
+  const total = raw.reduce((s, r) => s + r.score, 0);
+  const factors = raw
+    .sort((a, b) => b.score - a.score)
+    .map(r => ({
+      factor: r.name,
+      contribution: total > 0 ? roundN(r.score / total * 100, 1) : 0,
+      description: r.desc
+    }));
+
+  return { overall_discordance: overall, factors: factors };
+}
+
+function synthesizeRecommendation(revs, overlap, amstarResults, concordance, discordance) {
+  const n = revs.length;
+  const dirPct = Math.round(concordance.direction_agreement * 100);
+  const theta = concordance.quality_weighted_theta;
+  const ci = concordance.quality_weighted_ci;
+
+  const confOrder = ['Critically Low', 'Low', 'Moderate', 'High'];
+  const confs = amstarResults.map(a => a.confidence);
+  const confRanks = confs.map(c => confOrder.indexOf(c)).sort((a, b) => a - b);
+  const medianConf = confOrder[confRanks[Math.floor(confRanks.length / 2)]];
+
+  const disc = discordance.overall_discordance;
+  const topFactor = discordance.factors.length > 0 ? discordance.factors[0].factor : 'none identified';
+
+  const parts = [];
+  parts.push(dirPct + '% of ' + n + ' reviews agree on effect direction.');
+  parts.push('Quality-weighted pooled effect: ' + theta.toFixed(3) + ' (' + ci[0].toFixed(3) + ' to ' + ci[1].toFixed(3) + ').');
+  parts.push('Study overlap: CCA=' + overlap.cca.toFixed(3) + ' (' + overlap.groove + ').');
+  parts.push('Median AMSTAR-2 confidence: ' + medianConf + '.');
+  parts.push('Discordance: ' + disc + '.');
+  if (disc !== 'Concordant' && discordance.factors.length > 0) {
+    parts.push('Primary driver: ' + topFactor + ' (' + discordance.factors[0].contribution.toFixed(0) + '%).');
+  }
+  return parts.join(' ');
+}
+
+function computeInputHash(revs) {
+  const data = revs.map(r => ({ id: r.review_id, theta: r.theta, k: r.k }));
+  const raw = JSON.stringify(data);
+  return sha256Hex(raw);
+}
+
+function certify(revs, overlap, concordance) {
+  if (revs.length < 2) return 'REJECT';
+  if (overlap.n_unique_studies < 3) return 'WARN';
+  return 'PASS';
+}
+
+function runUmbrella(revs) {
+  const overlap = computeOverlap(revs);
+  const amstarResults = revs.map(r => {
+    if (r.amstar_items && Object.keys(r.amstar_items).length > 0) {
+      return scoreAmstar(r.review_id, r.amstar_items);
+    }
+    return { review_id: r.review_id, item_scores: {}, n_yes: 0, n_critical_yes: 0, n_critical_flaw: 0, confidence: 'Low' };
+  });
+  const concordance = computeConcordance(revs);
+  const discordance = computeDiscordance(revs, overlap, concordance);
+  const recommendation = synthesizeRecommendation(revs, overlap, amstarResults, concordance, discordance);
+  const inputHash = computeInputHash(revs);
+  const cert = certify(revs, overlap, concordance);
+
+  return {
+    overlap: overlap,
+    amstar_results: amstarResults,
+    concordance: concordance,
+    discordance: discordance,
+    recommendation: recommendation,
+    input_hash: inputHash,
+    certification: cert
+  };
+}
+
+// ===== UI Functions =====
+
+function initAmstarForm() {
+  const grid = document.getElementById('amstarFormGrid');
+  let html = '';
+  ALL_ITEMS.forEach((item, idx) => {
+    const isCritical = CRITICAL_ITEMS.has(item);
+    const label = AMSTAR_LABELS[idx] + (isCritical ? ' *' : '');
+    html += '<div class="form-group">' +
+      '<label for="amstar-' + item + '">' + escapeHtml(item + '. ' + label) + '<\/label>' +
+      '<select id="amstar-' + item + '">' +
+      '<option value="yes">Yes<\/option>' +
+      '<option value="partial">Partial<\/option>' +
+      '<option value="no" selected>No<\/option>' +
+      '<option value="NA">N/A<\/option>' +
+      '<\/select><\/div>';
+  });
+  grid.innerHTML = html;
+}
+
+function getAmstarFormValues() {
+  const items = {};
+  ALL_ITEMS.forEach(item => {
+    const el = document.getElementById('amstar-' + item);
+    if (el) items[item] = el.value;
+  });
+  return items;
+}
+
+function renderReviewsTable() {
+  const tbody = document.getElementById('reviewsTableBody');
+  const badge = document.getElementById('reviewCountBadge');
+  badge.textContent = reviews.length;
+
+  if (reviews.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No reviews added yet.<\/td><\/tr>';
+    document.getElementById('runAnalysisBtn').disabled = true;
+    return;
+  }
+  document.getElementById('runAnalysisBtn').disabled = reviews.length < 2;
+
+  let html = '';
+  reviews.forEach((r, idx) => {
+    const studyCount = (r.study_ids || []).length;
+    html += '<tr>' +
+      '<td>' + escapeHtml(r.review_id) + '<\/td>' +
+      '<td>' + escapeHtml(r.label || r.review_id) + '<\/td>' +
+      '<td>' + escapeHtml(String(r.year)) + '<\/td>' +
+      '<td>' + escapeHtml(r.measure) + '<\/td>' +
+      '<td>' + safeNum(r.theta, 0).toFixed(4) + '<\/td>' +
+      '<td>' + safeNum(r.ci_lo, 0).toFixed(4) + ' to ' + safeNum(r.ci_hi, 0).toFixed(4) + '<\/td>' +
+      '<td>' + (r.k || 0) + '<\/td>' +
+      '<td>' + studyCount + '<\/td>' +
+      '<td><button class="btn btn-danger btn-sm" data-remove="' + idx + '" aria-label="Remove ' + escapeHtml(r.review_id) + '">X<\/button><\/td>' +
+      '<\/tr>';
+  });
+  tbody.innerHTML = html;
+
+  tbody.querySelectorAll('[data-remove]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.getAttribute('data-remove'));
+      reviews.splice(idx, 1);
+      renderReviewsTable();
+    });
+  });
+}
+
+function addReview() {
+  const reviewId = document.getElementById('inp-reviewId').value.trim();
+  if (!reviewId) { alert('Review ID is required.'); return; }
+
+  const theta = safeNum(document.getElementById('inp-theta').value, null);
+  const ciLo = safeNum(document.getElementById('inp-ciLo').value, null);
+  const ciHi = safeNum(document.getElementById('inp-ciHi').value, null);
+  if (theta === null || ciLo === null || ciHi === null) {
+    alert('Effect, CI Lower, and CI Upper are required numbers.'); return;
+  }
+
+  const k = safeNum(document.getElementById('inp-k').value, 0);
+  const studyIds = document.getElementById('inp-studyIds').value
+    .split(',').map(s => s.trim()).filter(s => s.length > 0);
+  const scopeTags = document.getElementById('inp-scopeTags').value
+    .split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+  let se = (ciHi - ciLo) / (2 * 1.96);
+  if (!Number.isFinite(se) || se <= 0) se = 0.1;
+
+  const review = {
+    review_id: reviewId,
+    label: document.getElementById('inp-label').value.trim() || reviewId,
+    year: safeNum(document.getElementById('inp-year').value, 2024),
+    measure: document.getElementById('inp-measure').value,
+    theta: theta,
+    ci_lo: ciLo,
+    ci_hi: ciHi,
+    se: se,
+    k: k,
+    study_ids: studyIds,
+    scope_tags: scopeTags,
+    amstar_items: getAmstarFormValues()
+  };
+
+  reviews.push(review);
+  renderReviewsTable();
+  // Clear form
+  document.getElementById('inp-reviewId').value = '';
+  document.getElementById('inp-label').value = '';
+  document.getElementById('inp-theta').value = '';
+  document.getElementById('inp-ciLo').value = '';
+  document.getElementById('inp-ciHi').value = '';
+  document.getElementById('inp-k').value = '';
+  document.getElementById('inp-studyIds').value = '';
+  document.getElementById('inp-scopeTags').value = '';
+}
+
+function loadExample(name) {
+  const ex = EXAMPLES[name];
+  if (!ex) return;
+  reviews = ex.reviews.map(r => {
+    const rev = Object.assign({}, r);
+    rev.study_ids = r.study_ids.slice();
+    rev.scope_tags = r.scope_tags.slice();
+    rev.amstar_items = Object.assign({}, r.amstar_items);
+    let se = (r.ci_hi - r.ci_lo) / (2 * 1.96);
+    if (!Number.isFinite(se) || se <= 0) se = 0.1;
+    rev.se = se;
+    return rev;
+  });
+  renderReviewsTable();
+}
+
+function importData() {
+  const raw = document.getElementById('inp-import').value.trim();
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    if (data.reviews && Array.isArray(data.reviews)) {
+      data.reviews.forEach(r => {
+        let se = 0.1;
+        if (Number.isFinite(r.ci_lo) && Number.isFinite(r.ci_hi)) {
+          se = (r.ci_hi - r.ci_lo) / (2 * 1.96);
+        }
+        if (!Number.isFinite(se) || se <= 0) se = 0.1;
+        reviews.push({
+          review_id: r.review_id || 'Unknown',
+          label: r.label || r.review_id || 'Unknown',
+          year: r.year || 2024,
+          measure: r.measure || 'logOR',
+          theta: safeNum(r.theta, 0),
+          ci_lo: safeNum(r.ci_lo, 0),
+          ci_hi: safeNum(r.ci_hi, 0),
+          se: se,
+          k: safeNum(r.k, 0),
+          study_ids: r.study_ids || [],
+          scope_tags: r.scope_tags || [],
+          amstar_items: r.amstar_items || {}
+        });
+      });
+      renderReviewsTable();
+      document.getElementById('inp-import').value = '';
+    } else {
+      alert('Invalid JSON format. Expected {"reviews": [...]}.');
+    }
+  } catch (e) {
+    // Try CSV
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length < 2) { alert('Invalid data format.'); return; }
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    for (let i = 1; i < lines.length; i++) {
+      const vals = lines[i].split(',').map(v => v.trim());
+      const row = {};
+      headers.forEach((h, j) => { row[h] = vals[j] || ''; });
+      let se = 0.1;
+      const ciL = safeNum(row.ci_lo, 0);
+      const ciH = safeNum(row.ci_hi, 0);
+      if (ciL !== 0 && ciH !== 0) se = (ciH - ciL) / (2 * 1.96);
+      if (!Number.isFinite(se) || se <= 0) se = 0.1;
+      reviews.push({
+        review_id: row.review_id || 'R' + i,
+        label: row.label || row.review_id || 'R' + i,
+        year: safeNum(row.year, 2024),
+        measure: row.measure || 'logOR',
+        theta: safeNum(row.theta, 0),
+        ci_lo: ciL,
+        ci_hi: ciH,
+        se: se,
+        k: safeNum(row.k, 0),
+        study_ids: (row.study_ids || '').split(';').filter(s => s),
+        scope_tags: (row.scope_tags || '').split(';').filter(s => s),
+        amstar_items: {}
+      });
+    }
+    renderReviewsTable();
+    document.getElementById('inp-import').value = '';
+  }
+}
+
+// ===== Analysis + Rendering =====
+
+function runAnalysis() {
+  if (reviews.length < 2) { alert('At least 2 reviews are required.'); return; }
+  analysisResult = runUmbrella(reviews);
+
+  renderOverlapTab();
+  renderQualityTab();
+  renderEffectsTab();
+  renderDiscordanceTab();
+  renderReportTab();
+
+  // Enable export
+  document.getElementById('exportJsonBtn').disabled = false;
+  document.getElementById('copyJsonBtn').disabled = false;
+
+  // Switch to overlap tab
+  switchTab('overlap');
+}
+
+function getPlotlyLayout(title) {
+  const isDark = document.body.classList.contains('dark');
+  return {
+    title: { text: title, font: { family: 'Segoe UI, system-ui, sans-serif', size: 16, color: isDark ? '#f1f5f9' : '#1e293b' } },
+    paper_bgcolor: isDark ? '#1e293b' : '#ffffff',
+    plot_bgcolor: isDark ? '#1e293b' : '#ffffff',
+    font: { family: 'Segoe UI, system-ui, sans-serif', color: isDark ? '#f1f5f9' : '#1e293b' },
+    margin: { t: 50, b: 60, l: 120, r: 30 }
+  };
+}
+
+function renderOverlapTab() {
+  const o = analysisResult.overlap;
+  const grooveBadgeClass = 'badge-' + o.groove.toLowerCase().replace(' ', '-');
+
+  document.getElementById('overlapStats').innerHTML =
+    '<div class="stat-card"><div class="stat-value">' + o.cca.toFixed(4) + '<\/div><div class="stat-label">CCA<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value"><span class="badge ' + grooveBadgeClass + '">' + escapeHtml(o.groove) + '<\/span><\/div><div class="stat-label">GROOVE Classification<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + o.n_unique_studies + '<\/div><div class="stat-label">Unique Studies<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + o.n_total_citations + '<\/div><div class="stat-label">Total Citations<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + o.n_reviews + '<\/div><div class="stat-label">Reviews<\/div><\/div>';
+
+  // Heatmap
+  const labels = reviews.map(r => r.label || r.review_id);
+  const isDark = document.body.classList.contains('dark');
+  const heatData = [{
+    z: o.overlap_matrix,
+    x: labels,
+    y: labels,
+    type: 'heatmap',
+    colorscale: 'Teal',
+    text: o.overlap_matrix.map(row => row.map(v => String(v))),
+    texttemplate: '%{text}',
+    hovertemplate: '%{y} vs %{x}: %{z} shared studies<extra><\/extra>'
+  }];
+  const heatLayout = Object.assign({}, getPlotlyLayout('Pairwise Study Overlap Matrix'), {
+    xaxis: { tickangle: -45 },
+    yaxis: { autorange: 'reversed' },
+    height: 400
+  });
+  Plotly.newPlot('overlapHeatmap', heatData, heatLayout, { responsive: true });
+
+  // Study frequency bar
+  const entries = Object.entries(o.study_frequency).sort((a, b) => b[1] - a[1]);
+  const studyNames = entries.map(e => e[0]);
+  const studyCounts = entries.map(e => e[1]);
+  const barColors = studyCounts.map(c => c >= o.n_reviews ? '#0f766e' : c === 1 ? '#dc2626' : '#14b8a6');
+
+  const freqData = [{
+    y: studyNames.slice(0, 40),
+    x: studyCounts.slice(0, 40),
+    type: 'bar',
+    orientation: 'h',
+    marker: { color: barColors.slice(0, 40) },
+    hovertemplate: '%{y}: included in %{x} reviews<extra><\/extra>'
+  }];
+  const freqLayout = Object.assign({}, getPlotlyLayout('Study Inclusion Frequency'), {
+    xaxis: { title: 'Number of reviews including study', dtick: 1 },
+    yaxis: { autorange: 'reversed' },
+    height: Math.max(350, studyNames.slice(0, 40).length * 22),
+    margin: { l: 140, r: 30, t: 50, b: 60 }
+  });
+  Plotly.newPlot('studyFreqChart', freqData, freqLayout, { responsive: true });
+
+  // Ubiquitous / unique studies
+  const ubiq = entries.filter(e => e[1] >= o.n_reviews).map(e => e[0]);
+  const unique = entries.filter(e => e[1] === 1).map(e => e[0]);
+  let tableHtml = '<div class="form-row">' +
+    '<div><h3>Ubiquitous Studies (in all reviews)</h3><p class="text-muted">' +
+    (ubiq.length > 0 ? ubiq.map(s => escapeHtml(s)).join(', ') : 'None') + '<\/p><\/div>' +
+    '<div><h3>Unique Studies (in only 1 review)</h3><p class="text-muted">' +
+    (unique.length > 0 ? unique.map(s => escapeHtml(s)).join(', ') : 'None') + '<\/p><\/div>' +
+    '<\/div>';
+  document.getElementById('studyFreqTable').innerHTML = tableHtml;
+}
+
+function renderQualityTab() {
+  const results = analysisResult.amstar_results;
+  const confOrder = ['Critically Low', 'Low', 'Moderate', 'High'];
+  const confRanks = results.map(a => confOrder.indexOf(a.confidence)).sort((a, b) => a - b);
+  const medianConf = confOrder[confRanks[Math.floor(confRanks.length / 2)]];
+  const critLow = results.filter(a => a.confidence === 'Critically Low').length;
+
+  document.getElementById('qualityStats').innerHTML =
+    '<div class="stat-card"><div class="stat-value"><span class="badge badge-' + medianConf.toLowerCase().replace(' ', '-') + '">' +
+    escapeHtml(medianConf) + '<\/span><\/div><div class="stat-label">Median Confidence<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + critLow + '<\/div><div class="stat-label">Critically Low Reviews<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + results.length + '<\/div><div class="stat-label">Reviews Assessed<\/div><\/div>';
+
+  // Traffic light grid
+  let gridHtml = '<div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Review<\/th>';
+  ALL_ITEMS.forEach((item, idx) => {
+    const isCrit = CRITICAL_ITEMS.has(item) ? ' *' : '';
+    gridHtml += '<th style="text-align:center;min-width:40px;" title="' + escapeHtml(AMSTAR_LABELS[idx]) + '">' + item + isCrit + '<\/th>';
+  });
+  gridHtml += '<th>Confidence<\/th><\/tr><\/thead><tbody>';
+
+  results.forEach(r => {
+    gridHtml += '<tr><td>' + escapeHtml(r.review_id) + '<\/td>';
+    ALL_ITEMS.forEach(item => {
+      const val = (r.item_scores && r.item_scores[item]) || 'NA';
+      const isCrit = CRITICAL_ITEMS.has(item);
+      const cls = 'amstar-cell ' + val + (isCrit ? ' critical' : '');
+      gridHtml += '<td style="text-align:center;padding:2px;"><div class="' + cls + '" title="' +
+        escapeHtml(val) + '">' + escapeHtml(val.charAt(0).toUpperCase()) + '<\/div><\/td>';
+    });
+    const confCls = 'badge badge-' + r.confidence.toLowerCase().replace(' ', '-');
+    gridHtml += '<td><span class="' + confCls + '">' + escapeHtml(r.confidence) + '<\/span><\/td><\/tr>';
+  });
+  gridHtml += '<\/tbody><\/table><\/div>';
+  document.getElementById('amstarTrafficLight').innerHTML = gridHtml;
+
+  // AMSTAR Plotly chart (heatmap-style)
+  const isDark = document.body.classList.contains('dark');
+  const reviewLabels = results.map(r => r.review_id);
+  const itemLabels = ALL_ITEMS.map((item, idx) => item + (CRITICAL_ITEMS.has(item) ? '*' : ''));
+  const valMap = { 'yes': 2, 'partial': 1, 'no': 0, 'NA': -1 };
+  const zData = results.map(r =>
+    ALL_ITEMS.map(item => valMap[(r.item_scores && r.item_scores[item]) || 'NA'] ?? -1)
+  );
+  const textData = results.map(r =>
+    ALL_ITEMS.map(item => (r.item_scores && r.item_scores[item]) || 'NA')
+  );
+
+  const amstarData = [{
+    z: zData,
+    x: itemLabels,
+    y: reviewLabels,
+    type: 'heatmap',
+    colorscale: [[-0.333, '#94a3b8'], [0, '#dc2626'], [0.333, '#d97706'], [0.667, '#d97706'], [1, '#16a34a']],
+    zmin: -1, zmax: 2,
+    text: textData,
+    texttemplate: '%{text}',
+    hovertemplate: '%{y}, Item %{x}: %{text}<extra><\/extra>',
+    showscale: false
+  }];
+  const amstarLayout = Object.assign({}, getPlotlyLayout('AMSTAR-2 Item Scores'), {
+    xaxis: { title: 'AMSTAR-2 Item (* = critical)', dtick: 1 },
+    yaxis: { autorange: 'reversed' },
+    height: Math.max(300, results.length * 50 + 100)
+  });
+  Plotly.newPlot('amstarPlot', amstarData, amstarLayout, { responsive: true });
+}
+
+function renderEffectsTab() {
+  const c = analysisResult.concordance;
+  const dirBadge = c.direction_agreement >= 1.0 ? 'badge-concordant' : 'badge-major';
+  const sigText = c.all_significant ? 'Yes' : 'No';
+
+  document.getElementById('effectsStats').innerHTML =
+    '<div class="stat-card"><div class="stat-value"><span class="badge ' + dirBadge + '">' +
+    Math.round(c.direction_agreement * 100) + '%<\/span><\/div><div class="stat-label">Direction Agreement<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + c.meta_meta_i2.toFixed(1) + '%<\/div><div class="stat-label">Meta-meta I\u00B2<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + sigText + '<\/div><div class="stat-label">All Significant?<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + (c.ci_overlap_fraction * 100).toFixed(0) + '%<\/div><div class="stat-label">CI Overlap<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + c.quality_weighted_theta.toFixed(4) + '<\/div><div class="stat-label">Quality-Weighted Effect<\/div><\/div>';
+
+  // Forest of forests
+  const isDark = document.body.classList.contains('dark');
+  const revLabels = reviews.map(r => r.label || r.review_id).reverse();
+  const thetas = reviews.map(r => r.theta).reverse();
+  const ciLos = reviews.map(r => r.ci_lo).reverse();
+  const ciHis = reviews.map(r => r.ci_hi).reverse();
+  const errLo = thetas.map((t, i) => t - ciLos[i]);
+  const errHi = thetas.map((t, i) => ciHis[i] - t);
+
+  // Colors based on AMSTAR confidence
+  const amstarColors = reviews.map(r => {
+    if (r.amstar_items && Object.keys(r.amstar_items).length > 0) {
+      const res = scoreAmstar(r.review_id, r.amstar_items);
+      if (res.confidence === 'High') return '#16a34a';
+      if (res.confidence === 'Moderate') return '#d97706';
+      if (res.confidence === 'Low') return '#f97316';
+      return '#dc2626';
+    }
+    return '#64748b';
+  }).reverse();
+
+  const forestData = [
+    {
+      y: revLabels,
+      x: thetas,
+      error_x: { type: 'data', symmetric: false, array: errHi, arrayminus: errLo, thickness: 2, width: 6 },
+      mode: 'markers',
+      type: 'scatter',
+      marker: { size: 10, color: amstarColors, symbol: 'diamond' },
+      name: 'Review effects',
+      hovertemplate: '%{y}: %{x:.4f} (%{customdata[0]:.4f} to %{customdata[1]:.4f})<extra><\/extra>',
+      customdata: reviews.map(r => [r.ci_lo, r.ci_hi]).reverse()
+    },
+    {
+      y: ['POOLED (quality-weighted)'],
+      x: [c.quality_weighted_theta],
+      error_x: { type: 'data', symmetric: false,
+        array: [c.quality_weighted_ci[1] - c.quality_weighted_theta],
+        arrayminus: [c.quality_weighted_theta - c.quality_weighted_ci[0]],
+        thickness: 3, width: 8 },
+      mode: 'markers',
+      type: 'scatter',
+      marker: { size: 14, color: '#0f766e', symbol: 'diamond' },
+      name: 'Quality-weighted pooled',
+      hovertemplate: 'Pooled: %{x:.4f} (%{customdata[0]:.4f} to %{customdata[1]:.4f})<extra><\/extra>',
+      customdata: [[c.quality_weighted_ci[0], c.quality_weighted_ci[1]]]
+    }
+  ];
+  const forestLayout = Object.assign({}, getPlotlyLayout('Forest of Forests'), {
+    xaxis: { title: 'Effect (log scale)', zeroline: true, zerolinewidth: 2, zerolinecolor: isDark ? '#475569' : '#cbd5e1' },
+    yaxis: {},
+    showlegend: false,
+    height: Math.max(350, (reviews.length + 2) * 40 + 100),
+    shapes: [{
+      type: 'line', x0: 0, x1: 0, y0: -0.5, y1: revLabels.length + 0.5,
+      line: { color: isDark ? '#475569' : '#cbd5e1', width: 1, dash: 'dash' }
+    }]
+  });
+  Plotly.newPlot('forestPlot', forestData, forestLayout, { responsive: true });
+}
+
+function renderDiscordanceTab() {
+  const d = analysisResult.discordance;
+  const badgeCls = 'badge-' + d.overall_discordance.toLowerCase();
+
+  document.getElementById('discordanceStats').innerHTML =
+    '<div class="stat-card"><div class="stat-value"><span class="badge ' + badgeCls + '">' +
+    escapeHtml(d.overall_discordance) + '<\/span><\/div><div class="stat-label">Overall Discordance<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + d.factors.length + '<\/div><div class="stat-label">Factors Assessed<\/div><\/div>';
+
+  // Waterfall chart
+  const isDark = document.body.classList.contains('dark');
+  const factorNames = d.factors.map(f => f.factor);
+  const contributions = d.factors.map(f => f.contribution);
+  const barColors = contributions.map((c, i) => {
+    if (i === 0) return '#dc2626';
+    if (i === 1) return '#f97316';
+    if (i === 2) return '#d97706';
+    return '#14b8a6';
+  });
+
+  const waterfallData = [{
+    y: factorNames,
+    x: contributions,
+    type: 'bar',
+    orientation: 'h',
+    marker: { color: barColors },
+    text: contributions.map(c => c.toFixed(1) + '%'),
+    textposition: 'outside',
+    hovertemplate: '%{y}: %{x:.1f}%<extra><\/extra>'
+  }];
+  const waterfallLayout = Object.assign({}, getPlotlyLayout('Discordance Factor Decomposition'), {
+    xaxis: { title: 'Contribution (%)', range: [0, Math.max(...contributions) * 1.2 || 100] },
+    yaxis: { autorange: 'reversed' },
+    height: Math.max(300, d.factors.length * 50 + 100),
+    margin: { l: 160, r: 60, t: 50, b: 60 }
+  });
+  Plotly.newPlot('waterfallChart', waterfallData, waterfallLayout, { responsive: true });
+
+  // Detail table
+  let detailHtml = '<table class="data-table"><thead><tr><th>Factor<\/th><th>Contribution<\/th><th>Description<\/th><\/tr><\/thead><tbody>';
+  d.factors.forEach(f => {
+    detailHtml += '<tr><td><strong>' + escapeHtml(f.factor) + '<\/strong><\/td>' +
+      '<td>' + f.contribution.toFixed(1) + '%<\/td>' +
+      '<td class="text-muted">' + escapeHtml(f.description) + '<\/td><\/tr>';
+  });
+  detailHtml += '<\/tbody><\/table>';
+  document.getElementById('discordanceDetail').innerHTML = detailHtml;
+}
+
+function renderReportTab() {
+  const r = analysisResult;
+  const o = r.overlap;
+  const c = r.concordance;
+  const d = r.discordance;
+
+  let report = '';
+  report += 'UMBRELLA REVIEW ANALYSIS REPORT\n';
+  report += '================================\n\n';
+  report += 'Number of systematic reviews: ' + reviews.length + '\n';
+  report += 'Analysis date: ' + new Date().toISOString().split('T')[0] + '\n';
+  report += 'Input hash: ' + r.input_hash + '\n';
+  report += 'Certification: ' + r.certification + '\n\n';
+
+  report += '1. STUDY OVERLAP\n';
+  report += '   CCA: ' + o.cca.toFixed(4) + ' (' + o.groove + ')\n';
+  report += '   Unique studies: ' + o.n_unique_studies + '\n';
+  report += '   Total citations: ' + o.n_total_citations + '\n\n';
+
+  report += '2. QUALITY (AMSTAR-2)\n';
+  r.amstar_results.forEach(a => {
+    report += '   ' + a.review_id + ': ' + a.confidence + ' (' + a.n_yes + '/16 yes, ' + a.n_critical_flaw + ' critical flaws)\n';
+  });
+  report += '\n';
+
+  report += '3. EFFECT CONCORDANCE\n';
+  report += '   Direction agreement: ' + (c.direction_agreement * 100).toFixed(0) + '%\n';
+  report += '   All significant: ' + (c.all_significant ? 'Yes' : 'No') + '\n';
+  report += '   CI overlap: ' + (c.ci_overlap_fraction * 100).toFixed(0) + '% of pairs\n';
+  report += '   Meta-meta effect: ' + c.meta_meta_theta.toFixed(4) + ' (SE ' + c.meta_meta_se.toFixed(4) + ')\n';
+  report += '   Meta-meta I\u00B2: ' + c.meta_meta_i2.toFixed(1) + '%\n';
+  report += '   Effect range: ' + c.range_theta[0].toFixed(4) + ' to ' + c.range_theta[1].toFixed(4) + '\n';
+  report += '   Quality-weighted effect: ' + c.quality_weighted_theta.toFixed(4) +
+    ' (' + c.quality_weighted_ci[0].toFixed(4) + ' to ' + c.quality_weighted_ci[1].toFixed(4) + ')\n\n';
+
+  report += '4. DISCORDANCE\n';
+  report += '   Overall: ' + d.overall_discordance + '\n';
+  d.factors.forEach(f => {
+    report += '   ' + f.factor + ': ' + f.contribution.toFixed(1) + '% - ' + f.description + '\n';
+  });
+  report += '\n';
+
+  report += '5. RECOMMENDATION\n';
+  report += '   ' + r.recommendation + '\n';
+
+  document.getElementById('reportText').textContent = report;
+
+  // Methods paragraph
+  const methods = 'We conducted an umbrella review (systematic review of systematic reviews) including ' +
+    reviews.length + ' systematic reviews. Study overlap was quantified using the Corrected Covered Area ' +
+    '(CCA = ' + o.cca.toFixed(3) + ', classified as "' + o.groove + '" per the GROOVE framework; Pieper et al. 2014). ' +
+    'Methodological quality of each included review was assessed using AMSTAR-2 (Shea et al. 2017), with ' +
+    'confidence ratings assigned based on critical and non-critical domains. Effect concordance was evaluated ' +
+    'through direction agreement (' + (c.direction_agreement * 100).toFixed(0) + '%), pairwise CI overlap (' +
+    (c.ci_overlap_fraction * 100).toFixed(0) + '%), and meta-meta-analysis with inverse-variance weighting ' +
+    '(I\u00B2 = ' + c.meta_meta_i2.toFixed(1) + '%). Quality-weighted pooling used AMSTAR-2 confidence as ' +
+    'additional weights (High = 1.0, Moderate = 0.75, Low = 0.5, Critically Low = 0.25). Discordance was ' +
+    'classified as ' + d.overall_discordance + ' and decomposed into five factors: scope, inclusion criteria, ' +
+    'evidence base overlap, quality variation, and statistical methods.';
+
+  document.getElementById('methodsParagraph').textContent = methods;
+
+  // TruthCert JSON
+  const truthCert = {
+    tool: 'UmbrellaEngine',
+    version: '0.1.0',
+    timestamp: new Date().toISOString(),
+    input_hash: r.input_hash,
+    certification: r.certification,
+    n_reviews: reviews.length,
+    reviews: reviews.map(rv => ({
+      review_id: rv.review_id,
+      theta: rv.theta,
+      ci: [rv.ci_lo, rv.ci_hi],
+      k: rv.k,
+      measure: rv.measure,
+      year: rv.year,
+      n_studies: (rv.study_ids || []).length
+    })),
+    results: {
+      overlap: { cca: o.cca, groove: o.groove, unique_studies: o.n_unique_studies, total_citations: o.n_total_citations },
+      quality: r.amstar_results.map(a => ({ review_id: a.review_id, confidence: a.confidence, n_yes: a.n_yes, critical_flaws: a.n_critical_flaw })),
+      concordance: {
+        direction_agreement: c.direction_agreement,
+        all_significant: c.all_significant,
+        ci_overlap_fraction: c.ci_overlap_fraction,
+        meta_meta_theta: c.meta_meta_theta,
+        meta_meta_se: c.meta_meta_se,
+        meta_meta_i2: c.meta_meta_i2,
+        quality_weighted_theta: c.quality_weighted_theta,
+        quality_weighted_ci: c.quality_weighted_ci
+      },
+      discordance: {
+        overall: d.overall_discordance,
+        factors: d.factors.map(f => ({ factor: f.factor, contribution: f.contribution }))
+      }
+    },
+    recommendation: r.recommendation
+  };
+
+  document.getElementById('truthCertJson').textContent = JSON.stringify(truthCert, null, 2);
+}
+
+// ===== Tab Switching =====
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const isActive = btn.getAttribute('data-tab') === tabName;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  });
+  document.querySelectorAll('.tab-content').forEach(tc => {
+    tc.classList.toggle('active', tc.id === 'tab-' + tabName);
+  });
+  // Resize plotly charts on tab switch
+  setTimeout(function() {
+    const activeTab = document.getElementById('tab-' + tabName);
+    if (activeTab) {
+      activeTab.querySelectorAll('.plot-container').forEach(function(el) {
+        if (el.data) Plotly.Plots.resize(el);
+      });
+    }
+  }, 50);
+}
+
+// ===== Dark Mode =====
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark');
+  const isDark = document.body.classList.contains('dark');
+  localStorage.setItem('umbrellaEngine_darkMode', isDark ? '1' : '0');
+  document.getElementById('darkToggleBtn').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+  // Re-render charts if analysis exists
+  if (analysisResult) {
+    renderOverlapTab();
+    renderQualityTab();
+    renderEffectsTab();
+    renderDiscordanceTab();
+  }
+}
+
+// ===== Export =====
+
+function exportJson() {
+  if (!analysisResult) return;
+  const jsonStr = document.getElementById('truthCertJson').textContent;
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'umbrella-truthcert-' + analysisResult.input_hash + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyJson() {
+  const jsonStr = document.getElementById('truthCertJson').textContent;
+  navigator.clipboard.writeText(jsonStr).then(function() {
+    const btn = document.getElementById('copyJsonBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = 'Copy to Clipboard'; }, 2000);
+  });
+}
+
+// ===== Initialization =====
+
+function init() {
+  // Dark mode restore
+  if (localStorage.getItem('umbrellaEngine_darkMode') === '1') {
+    document.body.classList.add('dark');
+    document.getElementById('darkToggleBtn').textContent = 'Light Mode';
+  }
+
+  initAmstarForm();
+  renderReviewsTable();
+
+  // Tab buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() { switchTab(this.getAttribute('data-tab')); });
+    btn.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); switchTab(this.getAttribute('data-tab')); }
+    });
+  });
+
+  // Example buttons
+  document.getElementById('loadStatinsBtn').addEventListener('click', function() { loadExample('statins'); });
+  document.getElementById('loadSglt2iBtn').addEventListener('click', function() { loadExample('sglt2i'); });
+  document.getElementById('loadIvermectinBtn').addEventListener('click', function() { loadExample('ivermectin'); });
+
+  // Form buttons
+  document.getElementById('addReviewBtn').addEventListener('click', addReview);
+  document.getElementById('clearAllBtn').addEventListener('click', function() {
+    reviews = [];
+    analysisResult = null;
+    renderReviewsTable();
+    document.getElementById('exportJsonBtn').disabled = true;
+    document.getElementById('copyJsonBtn').disabled = true;
+  });
+  document.getElementById('importBtn').addEventListener('click', importData);
+  document.getElementById('runAnalysisBtn').addEventListener('click', runAnalysis);
+
+  // Dark mode
+  document.getElementById('darkToggleBtn').addEventListener('click', toggleDarkMode);
+
+  // Export
+  document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
+  document.getElementById('copyJsonBtn').addEventListener('click', copyJson);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
