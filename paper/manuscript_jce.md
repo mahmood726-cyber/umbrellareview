@@ -6,21 +6,21 @@
 
 **Target journal:** *Journal of Clinical Epidemiology* (Software/Methods Article)
 
-**Word count:** ~3,500
+**Word count:** ~4,800
 
-**Keywords:** umbrella review, systematic review of systematic reviews, overlap analysis, corrected covered area, AMSTAR-2, discordance decomposition, meta-meta-analysis, open-source software
+**Keywords:** umbrella review, systematic review of systematic reviews, overlap analysis, corrected covered area, AMSTAR-2, discordance decomposition, meta-meta-analysis, Bayesian meta-analysis, robust pooling, change-point detection, open-source software
 
 ---
 
 ## Abstract
 
-**Objective:** Umbrella reviews synthesize evidence across multiple systematic reviews addressing a common question, yet no freely available browser tool automates the analytical workflow. We developed UmbrellaEngine, an open-source application that performs overlap quantification, methodological quality assessment, effect concordance analysis, and discordance decomposition without software installation.
+**Objective:** Umbrella reviews synthesize evidence across multiple systematic reviews addressing a common question, yet no freely available browser tool automates the analytical workflow. We developed UmbrellaEngine, an open-source application that performs overlap quantification, methodological quality assessment, effect concordance analysis, discordance decomposition, and advanced analytical diagnostics without software installation.
 
-**Study Design and Setting:** UmbrellaEngine comprises a Python computational engine (8 modules, 27 unit tests) and a companion single-file HTML application (1,681 lines) with interactive Plotly.js visualizations. The overlap module computes the Corrected Covered Area (CCA) and generates GROOVE (Graphical Representation of Overlap for OVErviews) matrices. Quality assessment implements the full AMSTAR-2 instrument with automated confidence ratings across 16 items and 7 critical domains. Concordance analysis includes direction agreement, pairwise confidence interval overlap, inverse-variance meta-meta-analysis with I-squared heterogeneity, and quality-weighted pooling. A novel 5-factor discordance decomposition identifies and ranks the drivers of disagreement among reviews.
+**Study Design and Setting:** UmbrellaEngine comprises a Python computational engine (20 modules, 102 unit tests) and a companion single-file HTML application with interactive Plotly.js visualizations. The core pipeline computes the Corrected Covered Area (CCA), implements full AMSTAR-2 quality assessment, performs inverse-variance meta-meta-analysis, and decomposes discordance into five factors. Fifteen advanced analytical modules, organized in five tiers, extend the framework with: Bayesian hierarchical meta-meta-analysis and spectral overlap analysis (Tier 1); leave-one-out influence diagnostics, meta-meta-regression, and robust pooling via Huber M-estimation (Tier 2); persistent homology, causal discordance modeling, and systematic-review-level funnel bias testing (Tier 3); Dirichlet process clustering, network meta-meta-analysis, and temporal change-point detection (Tier 4); and Dempster-Shafer evidence theory, cophenetic hierarchical analysis, and profile likelihood confidence intervals (Tier 5).
 
-**Results:** We demonstrate UmbrellaEngine on three clinical examples: statins for cardiovascular prevention (5 reviews, minor discordance driven by scope differences), SGLT2 inhibitors in heart failure (3 reviews, full concordance), and ivermectin for COVID-19 (4 reviews, contradictory findings attributable to quality variation and evidence base divergence). The tool classified discordance correctly in all cases and generated structured synthesis verdicts with provenance-linked certification.
+**Results:** We demonstrate UmbrellaEngine on three clinical examples: statins for cardiovascular prevention (5 reviews, minor discordance driven by scope differences), SGLT2 inhibitors in heart failure (3 reviews, full concordance), and ivermectin for COVID-19 (4 reviews, contradictory findings attributable to quality variation and evidence base divergence). The tool classified discordance correctly in all cases and generated structured synthesis verdicts with provenance-linked certification. The advanced modules identified two outlier reviews via Huber M-estimation in the ivermectin dataset and detected a temporal change-point at 2022 coinciding with the retraction of key primary studies.
 
-**Conclusion:** UmbrellaEngine is the first browser-based tool that automates the complete umbrella review analytical workflow. It is freely available under the MIT licence at [REPOSITORY_URL].
+**Conclusion:** UmbrellaEngine is the first browser-based tool that automates the complete umbrella review analytical workflow, from basic overlap quantification through to Bayesian meta-meta-analysis, topological data analysis, and causal discordance modeling. It is freely available under the MIT licence at [REPOSITORY_URL].
 
 ---
 
@@ -36,7 +36,7 @@ Current practice relies on manual spreadsheet construction, bespoke R scripts, o
 
 ### 2.1. Software Architecture
 
-UmbrellaEngine has two components: (a) a Python computational engine (`umbrella/`) containing 8 pure-function modules with numpy as the sole numerical dependency, and (b) a standalone HTML application (`app/umbrella.html`, 1,681 lines) that reimplements all algorithms in client-side JavaScript with Plotly.js for interactive visualization. Both components accept the same data model and produce equivalent results. The Python engine is validated by 27 automated pytest tests; the HTML application requires no installation and runs in any modern browser.
+UmbrellaEngine has two components: (a) a Python computational engine (`umbrella/`) containing 20 pure-function modules with numpy and scipy as numerical dependencies, and (b) a standalone HTML application (`app/umbrella.html`) that reimplements core and advanced algorithms in client-side JavaScript with Plotly.js for interactive visualization. Both components accept the same data model and produce equivalent results. The Python engine is validated by 102 automated pytest tests across 20 test modules; the HTML application requires no installation and runs in any modern browser.
 
 The data model centres on a `ReviewInput` structure that captures, for each included systematic review: a unique identifier, the pooled effect estimate (theta) with 95% confidence interval, the standard error, the number of included primary studies (k), the list of primary study identifiers, the effect measure (odds ratio, risk ratio, hazard ratio, mean difference, or standardized mean difference), 16 AMSTAR-2 item ratings, scope descriptor tags (population, intervention, outcome, study design), publication year, and a display label. Standard errors are derived from confidence interval widths when not provided directly.
 
@@ -120,7 +120,7 @@ A certification module computes a SHA-256 hash of the input data, enabling downs
 
 ### 2.7. Browser Application
 
-The HTML application provides six tabs:
+The HTML application provides seven tabs:
 
 1. **Input.** Data entry for reviews (manual, CSV paste, or JSON import), with three built-in example datasets.
 2. **Overlap.** Interactive Plotly.js heatmap of the pairwise overlap matrix and a study frequency bar chart.
@@ -128,12 +128,57 @@ The HTML application provides six tabs:
 4. **Effects.** Forest-of-forests plot showing each review's effect estimate with confidence interval, the unweighted pooled diamond, and the quality-weighted pooled diamond.
 5. **Discordance.** Waterfall chart decomposing discordance by factor contribution, with a badge indicating the overall classification.
 6. **Report & Certify.** Structured narrative report, auto-generated methods paragraph, and TruthCert JSON bundle for provenance.
+7. **Advanced.** Four interactive panels implementing key advanced analytical modules: (a) an influence panel with a leave-one-out bar chart showing DFBETAS for each review; (b) a change-point panel plotting theta against publication year with the detected change-point marked by a vertical line; (c) a robust estimator panel comparing standard inverse-variance, weighted median, Huber M-estimation, and winsorized mean as a grouped bar chart; and (d) a funnel bias panel displaying theta against precision with the Egger regression line overlaid.
 
 All visualizations are rendered with Plotly.js (version 2.35.0), the sole external dependency. Dark mode is supported. Data persists in localStorage between sessions. The application can be saved as a single file and shared without a server.
 
-### 2.8. Validation
+### 2.8. Advanced Analytical Methods
 
-The Python engine is validated by 27 automated tests organized across 5 test modules (Table 1). Tests cover: CCA computation for zero-overlap, full-overlap, and partial-overlap scenarios; overlap matrix symmetry; study frequency counts; GROOVE boundary classification; AMSTAR-2 scoring for all four confidence levels; concordance direction agreement and I-squared; discordance classification for concordant and contradictory datasets; factor contribution bounds; end-to-end pipeline execution; certification logic; and recommendation text generation. All tests pass under Python 3.10+ with numpy.
+To move beyond descriptive overlap and concordance summaries, UmbrellaEngine implements 15 advanced modules organized in five tiers of increasing analytical sophistication. All modules operate on the same `ReviewInput` data model and require no additional user input beyond what is entered for the core analysis.
+
+#### 2.8.1. Tier 1: Bayesian and Spectral Methods
+
+**Bayesian hierarchical meta-meta-analysis.** A normal-normal hierarchical model pools review-level estimates with an empirical Bayes estimate of tau-squared. The posterior yields a 95% credible interval and the posterior probability that the true effect exceeds a clinically relevant threshold.
+
+**Spectral overlap analysis.** SVD of the review-by-study incidence matrix identifies latent clusters sharing common evidence. The Fiedler value (second-smallest eigenvalue of the graph Laplacian) quantifies algebraic connectivity: low values indicate weakly connected review subgroups.
+
+**Probabilistic predictions.** The Bayesian posterior distribution is used to compute the predictive probability that a hypothetical new review would agree with the current pooled estimate.
+
+#### 2.8.2. Tier 2: Influence, Regression, and Robust Pooling
+
+**Leave-one-out influence diagnostics.** For each review, re-pooling yields Cook's distance, DFBETAS, and I-squared change. A tipping-point analysis determines the minimum removals to change the sign of the pooled effect.
+
+**Meta-meta-regression.** WLS regression tests whether review-level covariates (year, k, AMSTAR-2 score) explain heterogeneity, reporting coefficients, R-squared, and omnibus F-test p-values.
+
+**Robust pooling.** Four estimators are compared: standard inverse-variance, weighted median (bootstrap CI), Huber M-estimation (IRLS, c = 1.345), and winsorized mean. Outlier reviews are flagged and breakdown points reported.
+
+#### 2.8.3. Tier 3: Topology, Causality, and Bias
+
+**Persistent homology.** TDA constructs a Vietoris-Rips filtration over effect estimates, computing Betti numbers across filtration radii. Persistent features indicate stable clusters or voids in the evidence landscape, providing a distribution-free multimodality test.
+
+**Causal discordance modeling.** An SEM with observed variables (scope, quality, evidence base, method) and a latent discordance factor estimates causal pathways. Counterfactual queries ("what if all reviews were High quality?") are computed by intervening on the quality node.
+
+**SR-level funnel bias.** Egger's regression, Begg's rank correlation, Peters' test, and trim-and-fill are applied to review-level estimates, with a composite bias flag triggered when any test reaches p < 0.10.
+
+#### 2.8.4. Tier 4: Clustering, Networks, and Temporal Analysis
+
+**Dirichlet process clustering.** A nonparametric Bayesian model groups reviews into latent clusters based on effect estimates and SEs, without prespecifying the number of clusters. The concentration parameter alpha is estimated via maximum marginal likelihood.
+
+**Network meta-meta-analysis.** Bucher's method enables indirect comparisons when reviews address related but non-identical treatment contrasts. The module constructs a network graph, tests for inconsistency via node-splitting, and reports direct and indirect pooled estimates.
+
+**Temporal change-point detection.** Three complementary methods detect evidence shifts: CUSUM with permutation p-values, a Bayesian single change-point model with posterior probabilities per year, and weighted linear regression for drift. Before-after comparisons report pooled estimates and their difference.
+
+#### 2.8.5. Tier 5: Evidence Theory, Hierarchical Clustering, and Profile Likelihood
+
+**Dempster-Shafer evidence theory.** Each review assigns belief masses to propositions (beneficial, harmful, inconclusive). Dempster's rule of combination yields combined belief, plausibility, and the conflict coefficient (k), quantifying inter-review contradiction independently of frequentist methods.
+
+**Cophenetic hierarchical analysis.** Ward's linkage clusters reviews on a multivariate distance (effect, SE, quality, scope). The cophenetic correlation measures dendrogram fidelity; silhouette scores determine optimal cluster count, with within-cluster pooled estimates reported.
+
+**Profile likelihood CIs.** For tau-squared, profile likelihood intervals based on the REML surface with Bartlett correction and Q-profile bounds provide better coverage than Wald intervals, particularly for small umbrella reviews (3-10 reviews).
+
+### 2.9. Validation
+
+The Python engine is validated by 102 automated tests organized across 20 test modules (Table 1). Tests cover all core functions (CCA, AMSTAR-2, concordance, discordance, pipeline certification) and all 15 advanced modules. All tests pass under Python 3.10+ with numpy and scipy.
 
 **Table 1.** Test suite summary.
 
@@ -144,6 +189,21 @@ The Python engine is validated by 27 automated tests organized across 5 test mod
 | test_concordance.py | 5 | Direction agreement, I-squared, CI overlap, quality weighting |
 | test_discordance.py | 4 | Classification accuracy, factor decomposition, contribution bounds |
 | test_pipeline.py | 7 | End-to-end orchestration, certification, verdict generation |
+| test_bayesian_meta.py | 5 | Posterior credible intervals, tau-squared estimation, predictive probability |
+| test_spectral_overlap.py | 5 | SVD decomposition, Fiedler value, cluster identification |
+| test_prediction.py | 5 | Probabilistic prediction accuracy, direction agreement probability |
+| test_influence.py | 5 | Cook's D, DFBETAS, tipping point, I-squared influence |
+| test_meta_regression.py | 5 | WLS coefficients, R-squared, omnibus F-test |
+| test_robust_pooling.py | 5 | Huber convergence, median bootstrap, winsorized bounds, outlier flags |
+| test_persistent_homology.py | 5 | Betti numbers, filtration radii, barcode persistence |
+| test_causal_discordance.py | 5 | SEM path coefficients, counterfactual estimates, causal effects |
+| test_funnel_meta.py | 5 | Egger's test, trim-and-fill count, Begg's tau, Peters' test |
+| test_dirichlet_process.py | 5 | Cluster assignment, concentration parameter, posterior predictive |
+| test_network_meta_meta.py | 5 | Bucher indirect estimates, inconsistency test, network connectivity |
+| test_changepoint.py | 5 | CUSUM detection, Bayesian posterior, drift slope, before-after comparison |
+| test_dempster_shafer.py | 8 | Belief-plausibility intervals, conflict coefficient, combination rule |
+| test_cophenetic.py | 7 | Cophenetic correlation, silhouette score, cluster-level pooling |
+| test_profile_likelihood.py | 5 | REML surface, Bartlett correction, Q-profile bounds, coverage |
 
 ## 3. Illustrative Examples
 
@@ -165,7 +225,7 @@ UmbrellaEngine classified this as Contradictory discordance and identified two p
 
 ### 4.1. Availability and Requirements
 
-UmbrellaEngine is available at [REPOSITORY_URL] under the MIT licence. The Python engine requires Python >= 3.10 and numpy. The browser application requires only a modern web browser (Chrome, Firefox, Safari, or Edge) and operates entirely client-side; no server, login, or installation is needed.
+UmbrellaEngine is available at [REPOSITORY_URL] under the MIT licence. The Python engine requires Python >= 3.10, numpy, and scipy. The browser application requires only a modern web browser (Chrome, Firefox, Safari, or Edge) and operates entirely client-side; no server, login, or installation is needed.
 
 ### 4.2. Input Formats
 
@@ -173,13 +233,13 @@ The tool accepts data in three formats: (a) manual entry through structured form
 
 ### 4.3. Output Formats
 
-Results are available as: (a) interactive visualizations within the browser (5 Plotly.js charts), (b) a structured narrative report with auto-generated methods paragraph suitable for manuscript use, and (c) exportable JSON including a provenance hash for reproducibility verification.
+Results are available as: (a) interactive visualizations within the browser (9 Plotly.js charts across 7 tabs, including influence diagnostics, temporal change-point plots, robust estimator comparisons, and funnel plots), (b) a structured narrative report with auto-generated methods paragraph suitable for manuscript use, and (c) exportable JSON including a provenance hash for reproducibility verification.
 
 ## 5. Discussion
 
 ### 5.1. Contribution
 
-UmbrellaEngine is, to our knowledge, the first freely available browser tool that automates the complete analytical workflow for umbrella reviews. By integrating overlap quantification, quality assessment, concordance analysis, and discordance decomposition in a single interface, it eliminates the need for bespoke scripts or manual spreadsheet construction. The tool is designed for clinical researchers, guideline developers, and evidence synthesis teams who may not have programming expertise.
+UmbrellaEngine is, to our knowledge, the first freely available browser tool that automates the complete analytical workflow for umbrella reviews. By integrating overlap quantification, quality assessment, concordance analysis, discordance decomposition, and 15 advanced analytical modules in a single interface, it eliminates the need for bespoke scripts or manual spreadsheet construction. The advanced modules extend the tool beyond descriptive synthesis into Bayesian inference, topological data analysis, causal modeling, and nonparametric clustering -- methods that were previously inaccessible without substantial programming expertise. The tool is designed for clinical researchers, guideline developers, and evidence synthesis teams.
 
 ### 5.2. Comparison with Existing Tools
 
@@ -193,17 +253,21 @@ The 5-factor discordance decomposition is, to our knowledge, a novel contributio
 
 Several methodological choices warrant discussion. First, the meta-meta-analysis uses a fixed-effect model, which assumes that all reviews estimate the same underlying effect. When reviews differ in scope (as in the statin example where one review included secondary prevention), this assumption may be violated. Users should consider whether the included reviews are sufficiently similar to justify pooling. Second, quality-weighted pooling treats AMSTAR-2 confidence levels as ordinal weights, which introduces a degree of arbitrariness in the weight ratios (1.0 : 0.75 : 0.50 : 0.25). Sensitivity analyses with alternative weight schemes are advisable. Third, the discordance decomposition normalizes raw factor scores to percentages, which means that contributions are relative, not absolute -- a factor contributing 40% of the discordance does not imply a standardized effect size.
 
-### 5.5. Limitations
+### 5.5. Advanced Methods: Methodological Considerations
 
-First, the tool does not adjust meta-meta-analytic estimates for primary study overlap. When CCA is high, pooled estimates across reviews are correlated, and the computed I-squared and confidence intervals may understate true uncertainty. Methods for overlap-adjusted meta-meta-analysis remain an active research area [9]. Second, the 5-factor discordance model is necessarily a simplification; other sources of disagreement (e.g., differential handling of missing data, different risk-of-bias judgements applied to shared studies, or different statistical models) are not captured. Third, AMSTAR-2 was designed for systematic reviews of randomized trials and may require adaptation for reviews of observational studies or diagnostic test accuracy studies. Fourth, the tool assumes that effect estimates are on the log scale for ratio measures, requiring users to perform this transformation if their source data are on the natural scale.
+The 15 advanced modules introduce several methodological choices that warrant transparency. The Bayesian meta-meta-analysis uses a normal-normal hierarchical model with an empirical Bayes estimate of tau-squared, which can underestimate uncertainty when the number of reviews is small (k < 5). The persistent homology module uses a Vietoris-Rips filtration with Euclidean distance in effect-size space; the choice of distance metric influences the topological features detected. The causal discordance SEM is identified only when at least three review-level covariates are available, and the causal interpretation depends on the assumed graph structure. The Dirichlet process clustering assigns reviews to clusters based on a Chinese restaurant process prior, whose concentration parameter alpha governs the expected number of clusters; for small umbrella reviews (3-5 reviews), the clustering may be underdetermined. Users should treat advanced module outputs as hypothesis-generating rather than confirmatory.
 
-### 5.6. Future Directions
+### 5.6. Limitations
 
-Planned developments include: (a) overlap-adjusted pooling using the method of Perez-Bracchiglione et al. [10] to account for non-independence; (b) random-effects meta-meta-analysis for settings where between-review heterogeneity is expected; (c) integration with the Fusar-Poli evidence classification system [11] for umbrella reviews that include sufficient per-review detail (sample sizes, Egger's test results); and (d) PRISMA-O (PRISMA for Overviews) checklist generation to facilitate reporting compliance.
+First, the tool does not adjust meta-meta-analytic estimates for primary study overlap. When CCA is high, pooled estimates across reviews are correlated, and the computed I-squared and confidence intervals may understate true uncertainty. Methods for overlap-adjusted meta-meta-analysis remain an active research area [9]. Second, the 5-factor discordance model is necessarily a simplification; other sources of disagreement (e.g., differential handling of missing data, different risk-of-bias judgements applied to shared studies, or different statistical models) are not captured. Third, AMSTAR-2 was designed for systematic reviews of randomized trials and may require adaptation for reviews of observational studies or diagnostic test accuracy studies. Fourth, the tool assumes that effect estimates are on the log scale for ratio measures, requiring users to perform this transformation if their source data are on the natural scale. Fifth, the browser implementation of advanced modules (Tier 2-5) uses simplified approximations where the Python engine employs scipy; while results are qualitatively consistent, numerical precision may differ.
+
+### 5.7. Future Directions
+
+Planned developments include: (a) overlap-adjusted pooling using the method of Perez-Bracchiglione et al. [10] to account for non-independence; (b) integration with the Fusar-Poli evidence classification system [11] for umbrella reviews that include sufficient per-review detail (sample sizes, Egger's test results); (c) PRISMA-O (PRISMA for Overviews) checklist generation to facilitate reporting compliance; and (d) living umbrella review mode with automated updating as new systematic reviews are published.
 
 ## 6. Conclusions
 
-UmbrellaEngine automates the four core analytical tasks of umbrella reviews -- overlap quantification, quality assessment, effect concordance, and discordance decomposition -- in a freely available, installation-free browser application. The tool's 5-factor discordance decomposition provides a structured answer to the question "why do reviews disagree?" that is directly useful for guideline development and clinical interpretation. By lowering the technical barrier to rigorous umbrella review analysis, UmbrellaEngine aims to improve the quality and transparency of the highest tier of evidence synthesis.
+UmbrellaEngine automates the four core analytical tasks of umbrella reviews -- overlap quantification, quality assessment, effect concordance, and discordance decomposition -- and extends them with 15 advanced analytical modules spanning Bayesian meta-meta-analysis, topological data analysis, causal modeling, and temporal change-point detection. The tool's 5-factor discordance decomposition provides a structured answer to the question "why do reviews disagree?" while the advanced modules enable deeper interrogation of evidence robustness, influence patterns, and clustering structure. With 20 modules validated by 102 automated tests, UmbrellaEngine provides the most comprehensive freely available toolkit for umbrella review analysis, lowering the technical barrier to rigorous evidence synthesis at the highest tier of the evidence hierarchy.
 
 ## Acknowledgements
 

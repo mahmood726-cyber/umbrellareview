@@ -371,6 +371,7 @@ body.dark .amstar-cell.critical { box-shadow: inset 0 0 0 2px #f1f5f9; }
   <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-effects" id="tabBtn-effects" data-tab="effects">Effects</button>
   <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-discordance" id="tabBtn-discordance" data-tab="discordance">Discordance</button>
   <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-report" id="tabBtn-report" data-tab="report">Report &amp; Certify</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-advanced" id="tabBtn-advanced" data-tab="advanced">Advanced</button>
 </nav>
 
 <!-- ===== Tab 1: Input ===== -->
@@ -536,6 +537,34 @@ body.dark .amstar-cell.critical { box-shadow: inset 0 0 0 2px #f1f5f9; }
       <button class="btn btn-primary" id="exportJsonBtn" disabled>Export JSON</button>
       <button class="btn btn-secondary" id="copyJsonBtn" disabled>Copy to Clipboard</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== Tab 7: Advanced ===== -->
+<div class="tab-content" id="tab-advanced" role="tabpanel" aria-labelledby="tabBtn-advanced">
+  <div class="card">
+    <h2>Leave-One-Out Influence Diagnostics</h2>
+    <p class="text-muted mb-1">DFBETAS: standardized change in pooled estimate when each review is removed. Larger absolute values indicate greater influence.</p>
+    <div class="plot-container" id="advInfluencePlot" role="img" aria-label="Influence DFBETAS bar chart"></div>
+    <div id="advInfluenceStats" class="stats-grid mt-1"></div>
+  </div>
+  <div class="card">
+    <h2>Temporal Change-Point Detection</h2>
+    <p class="text-muted mb-1">Effect estimates plotted by publication year. Vertical line marks the detected change-point (maximum CUSUM deviation).</p>
+    <div class="plot-container" id="advChangepointPlot" role="img" aria-label="Change-point temporal plot"></div>
+    <div id="advChangepointStats" class="stats-grid mt-1"></div>
+  </div>
+  <div class="card">
+    <h2>Robust Estimator Comparison</h2>
+    <p class="text-muted mb-1">Four pooling methods compared: standard inverse-variance, weighted median, Huber M-estimation, and winsorized mean.</p>
+    <div class="plot-container" id="advRobustPlot" role="img" aria-label="Robust estimator comparison bar chart"></div>
+    <div id="advRobustStats" class="stats-grid mt-1"></div>
+  </div>
+  <div class="card">
+    <h2>Funnel Bias Assessment</h2>
+    <p class="text-muted mb-1">Funnel plot of review-level estimates (theta vs precision = 1/SE) with Egger regression line. Asymmetry suggests publication bias.</p>
+    <div class="plot-container" id="advFunnelPlot" role="img" aria-label="Funnel plot with Egger regression"></div>
+    <div id="advFunnelStats" class="stats-grid mt-1"></div>
   </div>
 </div>
 
@@ -980,6 +1009,410 @@ function runUmbrella(revs) {
   };
 }
 
+// ===== Advanced Engine Functions (ported from Python) =====
+
+function advIvPool(thetas, ses) {
+  var n = thetas.length;
+  var w = ses.map(function(s) { return 1.0 / (s * s); });
+  var sumW = w.reduce(function(a, b) { return a + b; }, 0);
+  var thetaHat = 0;
+  for (var i = 0; i < n; i++) thetaHat += w[i] * thetas[i];
+  thetaHat /= sumW;
+  var seHat = 1.0 / Math.sqrt(sumW);
+  var q = 0;
+  for (var i = 0; i < n; i++) q += w[i] * Math.pow(thetas[i] - thetaHat, 2);
+  var i2val = (q > 0 && n > 1) ? Math.max(0, (q - (n - 1)) / q * 100) : 0;
+  return { theta: thetaHat, se: seHat, q: q, i2: i2val };
+}
+
+function computeAdvInfluence(revs) {
+  var n = revs.length;
+  if (n < 2) return null;
+  var thetas = revs.map(function(r) { return r.theta; });
+  var ses = revs.map(function(r) {
+    if (Number.isFinite(r.se) && r.se > 0) return r.se;
+    if (Number.isFinite(r.ci_lo) && Number.isFinite(r.ci_hi)) {
+      var s = (r.ci_hi - r.ci_lo) / (2 * 1.96);
+      if (s > 0) return s;
+    }
+    return 0.1;
+  });
+
+  var full = advIvPool(thetas, ses);
+  var cooksD = {};
+  var dfbetas = {};
+  var i2Influence = {};
+  var looEstimates = [];
+
+  for (var i = 0; i < n; i++) {
+    var tLoo = [], sLoo = [];
+    for (var j = 0; j < n; j++) {
+      if (j !== i) { tLoo.push(thetas[j]); sLoo.push(ses[j]); }
+    }
+    var looResult = advIvPool(tLoo, sLoo);
+    var rid = revs[i].review_id;
+    looEstimates.push({ review_id: rid, theta_without: roundN(looResult.theta, 6) });
+
+    var varFull = full.se * full.se;
+    cooksD[rid] = varFull > 0 ? roundN(Math.pow(full.theta - looResult.theta, 2) / varFull, 6) : 0;
+    dfbetas[rid] = full.se > 0 ? roundN((full.theta - looResult.theta) / full.se, 6) : 0;
+    i2Influence[rid] = roundN(full.i2 - looResult.i2, 4);
+  }
+
+  // Most influential
+  var mostInfluential = Object.keys(cooksD).reduce(function(a, b) { return cooksD[a] > cooksD[b] ? a : b; });
+
+  // Tipping point (greedy single-removal)
+  var signFull = Math.sign(full.theta);
+  var tipping = n;
+  if (signFull !== 0) {
+    var remaining = [];
+    for (var i = 0; i < n; i++) remaining.push(i);
+    for (var removed = 1; removed < n; removed++) {
+      var bestIdx = -1, bestTheta = null;
+      for (var p = 0; p < remaining.length; p++) {
+        var trial = remaining.filter(function(_, qi) { return qi !== p; });
+        if (trial.length < 1) continue;
+        var tTrial = trial.map(function(idx) { return thetas[idx]; });
+        var sTrial = trial.map(function(idx) { return ses[idx]; });
+        var trialResult = advIvPool(tTrial, sTrial);
+        if (bestTheta === null ||
+            (signFull < 0 && trialResult.theta > bestTheta) ||
+            (signFull > 0 && trialResult.theta < bestTheta)) {
+          bestTheta = trialResult.theta;
+          bestIdx = p;
+        }
+      }
+      if (bestIdx >= 0) {
+        remaining.splice(bestIdx, 1);
+        if (Math.sign(bestTheta) !== signFull || bestTheta === 0) {
+          tipping = removed;
+          break;
+        }
+      }
+    }
+  } else {
+    tipping = 0;
+  }
+
+  return {
+    loo_estimates: looEstimates,
+    cooks_d: cooksD,
+    dfbetas: dfbetas,
+    i2_influence: i2Influence,
+    most_influential: mostInfluential,
+    tipping_point: tipping,
+    full_theta: full.theta,
+    full_se: full.se
+  };
+}
+
+function computeAdvChangepoint(revs) {
+  if (revs.length < 3) return null;
+  var sorted = revs.slice().sort(function(a, b) { return a.year - b.year || a.review_id.localeCompare(b.review_id); });
+  var thetas = sorted.map(function(r) { return r.theta; });
+  var ses = sorted.map(function(r) {
+    if (Number.isFinite(r.se) && r.se > 0) return r.se;
+    if (Number.isFinite(r.ci_lo) && Number.isFinite(r.ci_hi)) {
+      var s = (r.ci_hi - r.ci_lo) / (2 * 1.96);
+      if (s > 0) return s;
+    }
+    return 0.1;
+  });
+  var years = sorted.map(function(r) { return r.year; });
+  var labels = sorted.map(function(r) { return r.label || r.review_id; });
+  var n = thetas.length;
+
+  // Weighted mean
+  var w = ses.map(function(s) { return 1.0 / (s * s); });
+  var sumW = w.reduce(function(a, b) { return a + b; }, 0);
+  var thetaBar = 0;
+  for (var i = 0; i < n; i++) thetaBar += w[i] * thetas[i];
+  thetaBar /= sumW;
+
+  // CUSUM
+  var cusum = [];
+  var cumS = 0;
+  for (var i = 0; i < n; i++) {
+    var seI = ses[i] > 0 ? ses[i] : 0.1;
+    cumS += (thetas[i] - thetaBar) / seI;
+    cusum.push(cumS);
+  }
+
+  var absCusum = cusum.map(function(c) { return Math.abs(c); });
+  var maxIdx = 0;
+  for (var i = 1; i < absCusum.length; i++) {
+    if (absCusum[i] > absCusum[maxIdx]) maxIdx = i;
+  }
+  var cpYear = years[maxIdx];
+
+  // Effect drift: weighted linear regression
+  var sumWx = 0, sumWy = 0, sumWxx = 0, sumWxy = 0;
+  for (var i = 0; i < n; i++) {
+    sumWx += w[i] * years[i];
+    sumWy += w[i] * thetas[i];
+    sumWxx += w[i] * years[i] * years[i];
+    sumWxy += w[i] * years[i] * thetas[i];
+  }
+  var driftDenom = sumW * sumWxx - sumWx * sumWx;
+  var slope = 0;
+  if (Math.abs(driftDenom) > 1e-15) {
+    slope = (sumW * sumWxy - sumWx * sumWy) / driftDenom;
+  }
+
+  // Before/after comparison
+  var beforeThetas = [], beforeSes = [], afterThetas = [], afterSes = [];
+  for (var i = 0; i < n; i++) {
+    if (years[i] <= cpYear) { beforeThetas.push(thetas[i]); beforeSes.push(ses[i]); }
+    else { afterThetas.push(thetas[i]); afterSes.push(ses[i]); }
+  }
+  // Ensure at least one in each group
+  if (beforeThetas.length === 0) { beforeThetas.push(thetas[0]); beforeSes.push(ses[0]); afterThetas.shift(); afterSes.shift(); }
+  if (afterThetas.length === 0) { afterThetas.push(thetas[n - 1]); afterSes.push(ses[n - 1]); beforeThetas.pop(); beforeSes.pop(); }
+
+  var poolBefore = advIvPool(beforeThetas, beforeSes);
+  var poolAfter = advIvPool(afterThetas, afterSes);
+
+  return {
+    years: years,
+    thetas: thetas,
+    ses: ses,
+    labels: labels,
+    cusum: cusum,
+    cp_year: cpYear,
+    slope: roundN(slope, 6),
+    before_theta: roundN(poolBefore.theta, 4),
+    after_theta: roundN(poolAfter.theta, 4),
+    delta: roundN(poolAfter.theta - poolBefore.theta, 4)
+  };
+}
+
+function computeAdvRobust(revs) {
+  if (revs.length < 2) return null;
+  var thetas = revs.map(function(r) { return r.theta; });
+  var ses = revs.map(function(r) {
+    if (Number.isFinite(r.se) && r.se > 0) return r.se;
+    if (Number.isFinite(r.ci_lo) && Number.isFinite(r.ci_hi)) {
+      var s = (r.ci_hi - r.ci_lo) / (2 * 1.96);
+      if (s > 0) return s;
+    }
+    return 0.1;
+  });
+  var n = thetas.length;
+  var w = ses.map(function(s) { return 1.0 / (s * s); });
+
+  // Standard IV
+  var sumW = w.reduce(function(a, b) { return a + b; }, 0);
+  var stdTheta = 0;
+  for (var i = 0; i < n; i++) stdTheta += w[i] * thetas[i];
+  stdTheta /= sumW;
+  var stdSe = 1.0 / Math.sqrt(sumW);
+
+  // Weighted median
+  var paired = thetas.map(function(t, i) { return { t: t, w: w[i] }; });
+  paired.sort(function(a, b) { return a.t - b.t; });
+  var cumW = 0, half = sumW / 2.0, medTheta = paired[0].t;
+  for (var i = 0; i < paired.length; i++) {
+    cumW += paired[i].w;
+    if (cumW >= half) { medTheta = paired[i].t; break; }
+  }
+
+  // Bootstrap SE for median (simplified)
+  var rng = xoshiro128ss(42);
+  var bootMeds = [];
+  for (var b = 0; b < 200; b++) {
+    var bThetas = [], bWeights = [];
+    for (var i = 0; i < n; i++) {
+      var idx = Math.floor(rng() * n);
+      bThetas.push(thetas[idx]);
+      bWeights.push(w[idx]);
+    }
+    var bPaired = bThetas.map(function(t, i) { return { t: t, w: bWeights[i] }; });
+    bPaired.sort(function(a, b) { return a.t - b.t; });
+    var bSumW = bWeights.reduce(function(a, c) { return a + c; }, 0);
+    var bHalf = bSumW / 2.0, bCum = 0, bMed = bPaired[0].t;
+    for (var i = 0; i < bPaired.length; i++) {
+      bCum += bPaired[i].w;
+      if (bCum >= bHalf) { bMed = bPaired[i].t; break; }
+    }
+    bootMeds.push(bMed);
+  }
+  bootMeds.sort(function(a, b) { return a - b; });
+  var medCiLo = bootMeds[Math.floor(bootMeds.length * 0.025)];
+  var medCiHi = bootMeds[Math.floor(bootMeds.length * 0.975)];
+
+  // Huber M-estimation (IRLS, c=1.345)
+  var huberC = 1.345;
+  var huberTheta = medTheta;
+  var outlierFlags = [];
+  for (var iter = 0; iter < 50; iter++) {
+    var wCombined = [];
+    for (var i = 0; i < n; i++) {
+      var resid = Math.abs((thetas[i] - huberTheta) / ses[i]);
+      var hw = resid <= huberC ? 1.0 : huberC / (resid > 0 ? resid : 1.0);
+      wCombined.push(hw * w[i]);
+    }
+    var wSum = wCombined.reduce(function(a, b) { return a + b; }, 0);
+    var newTheta = 0;
+    for (var i = 0; i < n; i++) newTheta += wCombined[i] * thetas[i];
+    newTheta /= wSum;
+    if (Math.abs(newTheta - huberTheta) < 1e-6) { huberTheta = newTheta; break; }
+    huberTheta = newTheta;
+  }
+  // Outlier detection
+  outlierFlags = [];
+  for (var i = 0; i < n; i++) {
+    if (Math.abs((thetas[i] - huberTheta) / ses[i]) > huberC) {
+      outlierFlags.push(revs[i].review_id);
+    }
+  }
+  // Huber SE
+  var wHuber = [];
+  for (var i = 0; i < n; i++) {
+    var resid = Math.abs((thetas[i] - huberTheta) / ses[i]);
+    var hw = resid <= huberC ? 1.0 : huberC / (resid > 0 ? resid : 1.0);
+    wHuber.push(hw * w[i]);
+  }
+  var huberSumW = wHuber.reduce(function(a, b) { return a + b; }, 0);
+  var huberSe = huberSumW > 0 ? 1.0 / Math.sqrt(huberSumW) : 0;
+
+  // Winsorized mean
+  var sortedT = thetas.slice().sort(function(a, b) { return a - b; });
+  var q1Idx = Math.floor(n * 0.25), q3Idx = Math.floor(n * 0.75);
+  var q1 = sortedT[q1Idx], q3 = sortedT[Math.min(q3Idx, n - 1)];
+  var iqr = q3 - q1;
+  var lower = q1 - 2.0 * iqr, upper = q3 + 2.0 * iqr;
+  var winsThetas = thetas.map(function(t) { return Math.max(lower, Math.min(upper, t)); });
+  var winsTheta = 0;
+  for (var i = 0; i < n; i++) winsTheta += w[i] * winsThetas[i];
+  winsTheta /= sumW;
+  var winsSe = stdSe;
+
+  return {
+    standard: { theta: roundN(stdTheta, 6), se: roundN(stdSe, 6), ci_lo: roundN(stdTheta - 1.96 * stdSe, 6), ci_hi: roundN(stdTheta + 1.96 * stdSe, 6) },
+    median: { theta: roundN(medTheta, 6), ci_lo: roundN(medCiLo, 6), ci_hi: roundN(medCiHi, 6) },
+    huber: { theta: roundN(huberTheta, 6), se: roundN(huberSe, 6), ci_lo: roundN(huberTheta - 1.96 * huberSe, 6), ci_hi: roundN(huberTheta + 1.96 * huberSe, 6) },
+    winsorized: { theta: roundN(winsTheta, 6), se: roundN(winsSe, 6), ci_lo: roundN(winsTheta - 1.96 * winsSe, 6), ci_hi: roundN(winsTheta + 1.96 * winsSe, 6) },
+    outlier_flags: outlierFlags
+  };
+}
+
+function computeAdvFunnel(revs) {
+  if (revs.length < 3) return null;
+  var thetas = revs.map(function(r) { return r.theta; });
+  var ses = revs.map(function(r) {
+    if (Number.isFinite(r.se) && r.se > 0) return r.se;
+    if (Number.isFinite(r.ci_lo) && Number.isFinite(r.ci_hi)) {
+      var s = (r.ci_hi - r.ci_lo) / (2 * 1.96);
+      if (s > 0) return s;
+    }
+    return 0.1;
+  });
+  var labels = revs.map(function(r) { return r.label || r.review_id; });
+  var n = thetas.length;
+  var precision = ses.map(function(s) { return 1.0 / s; });
+
+  // Pooled estimate
+  var w = ses.map(function(s) { return 1.0 / (s * s); });
+  var sumW = w.reduce(function(a, b) { return a + b; }, 0);
+  var thetaPooled = 0;
+  for (var i = 0; i < n; i++) thetaPooled += w[i] * thetas[i];
+  thetaPooled /= sumW;
+
+  // Egger's test: regress z = theta/se on 1/se
+  // z_i = intercept + slope * precision_i
+  var zScores = thetas.map(function(t, i) { return t / ses[i]; });
+  // OLS: z = a + b * precision
+  var sumP = 0, sumZ = 0, sumPP = 0, sumPZ = 0;
+  for (var i = 0; i < n; i++) {
+    sumP += precision[i];
+    sumZ += zScores[i];
+    sumPP += precision[i] * precision[i];
+    sumPZ += precision[i] * zScores[i];
+  }
+  var eggerDenom = n * sumPP - sumP * sumP;
+  var eggerIntercept = 0, eggerSlope = 0, eggerP = 1.0;
+  if (Math.abs(eggerDenom) > 1e-15) {
+    eggerIntercept = (sumPP * sumZ - sumP * sumPZ) / eggerDenom;
+    eggerSlope = (n * sumPZ - sumP * sumZ) / eggerDenom;
+
+    // SE of intercept for p-value
+    var resid2 = 0;
+    for (var i = 0; i < n; i++) {
+      var pred = eggerIntercept + eggerSlope * precision[i];
+      resid2 += Math.pow(zScores[i] - pred, 2);
+    }
+    var df = Math.max(1, n - 2);
+    var mse = resid2 / df;
+    var seIntercept = Math.sqrt(mse * sumPP / eggerDenom);
+    if (seIntercept > 0) {
+      var tStat = eggerIntercept / seIntercept;
+      // Two-sided p via normal approximation
+      eggerP = 2.0 * (0.5 * (1.0 + erf(-Math.abs(tStat) / Math.sqrt(2.0))));
+      // Use survival function for more accurate tail
+      eggerP = 2.0 * normalSF(Math.abs(tStat));
+    }
+  }
+
+  // Begg's rank correlation (simplified Kendall tau)
+  var concordant = 0, discordantB = 0;
+  for (var i = 0; i < n; i++) {
+    for (var j = i + 1; j < n; j++) {
+      var dx = thetas[i] - thetas[j];
+      var dy = ses[i] - ses[j];
+      if (dx * dy > 0) concordant++;
+      else if (dx * dy < 0) discordantB++;
+    }
+  }
+  var nPairs = n * (n - 1) / 2;
+  var beggTau = nPairs > 0 ? (concordant - discordantB) / nPairs : 0;
+  var varTau = (2.0 * (2.0 * n + 5.0)) / (9.0 * n * (n - 1.0));
+  var seTau = Math.sqrt(varTau);
+  var beggP = seTau > 0 ? 2.0 * normalSF(Math.abs(beggTau / seTau)) : 1.0;
+
+  // Trim and fill (simple count)
+  var nLeft = 0, nRight = 0;
+  for (var i = 0; i < n; i++) {
+    if (thetas[i] < thetaPooled) nLeft++;
+    else nRight++;
+  }
+  var nMissing = Math.max(0, Math.abs(nRight - nLeft));
+
+  var biasDetected = eggerP < 0.1 || beggP < 0.1;
+
+  return {
+    thetas: thetas,
+    precision: precision,
+    labels: labels,
+    theta_pooled: roundN(thetaPooled, 6),
+    egger_intercept: roundN(eggerIntercept, 4),
+    egger_slope: roundN(eggerSlope, 4),
+    egger_p: roundN(eggerP, 4),
+    begg_tau: roundN(beggTau, 4),
+    begg_p: roundN(beggP, 4),
+    n_missing: nMissing,
+    bias_detected: biasDetected
+  };
+}
+
+function normalSF(z) {
+  // Survival function 1 - Phi(z) using erf
+  return 0.5 * erfc(z / Math.sqrt(2.0));
+}
+
+function erf(x) {
+  // Approximation of the error function (Abramowitz and Stegun 7.1.26)
+  var sign = x >= 0 ? 1 : -1;
+  x = Math.abs(x);
+  var t = 1.0 / (1.0 + 0.3275911 * x);
+  var y = 1.0 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+  return sign * y;
+}
+
+function erfc(x) {
+  return 1.0 - erf(x);
+}
+
 // ===== UI Functions =====
 
 function initAmstarForm() {
@@ -1188,6 +1621,7 @@ function runAnalysis() {
   renderEffectsTab();
   renderDiscordanceTab();
   renderReportTab();
+  renderAdvancedTab();
 
   // Enable export
   document.getElementById('exportJsonBtn').disabled = false;
@@ -1567,6 +2001,231 @@ function renderReportTab() {
   document.getElementById('truthCertJson').textContent = JSON.stringify(truthCert, null, 2);
 }
 
+// ===== Advanced Tab Rendering =====
+
+function renderAdvancedTab() {
+  renderAdvInfluence();
+  renderAdvChangepoint();
+  renderAdvRobust();
+  renderAdvFunnel();
+}
+
+function renderAdvInfluence() {
+  var result = computeAdvInfluence(reviews);
+  if (!result) {
+    document.getElementById('advInfluencePlot').innerHTML = '<p class="text-muted text-center">Need at least 2 reviews.<\/p>';
+    return;
+  }
+
+  var isDark = document.body.classList.contains('dark');
+  var ids = Object.keys(result.dfbetas);
+  var vals = ids.map(function(id) { return result.dfbetas[id]; });
+  var colors = vals.map(function(v) { return Math.abs(v) > 1.0 ? '#dc2626' : (Math.abs(v) > 0.5 ? '#d97706' : '#14b8a6'); });
+
+  var barData = [{
+    y: ids,
+    x: vals,
+    type: 'bar',
+    orientation: 'h',
+    marker: { color: colors },
+    text: vals.map(function(v) { return v.toFixed(3); }),
+    textposition: 'outside',
+    hovertemplate: '%{y}: DFBETAS = %{x:.4f}<extra><\/extra>'
+  }];
+  var barLayout = Object.assign({}, getPlotlyLayout('Leave-One-Out DFBETAS'), {
+    xaxis: { title: 'DFBETAS (standardized change in pooled estimate)', zeroline: true, zerolinewidth: 2, zerolinecolor: isDark ? '#475569' : '#cbd5e1' },
+    yaxis: { autorange: 'reversed' },
+    height: Math.max(300, ids.length * 45 + 100),
+    margin: { l: 140, r: 80, t: 50, b: 60 },
+    shapes: [
+      { type: 'line', x0: -1, x1: -1, y0: -0.5, y1: ids.length - 0.5, line: { color: '#dc2626', width: 1, dash: 'dash' } },
+      { type: 'line', x0: 1, x1: 1, y0: -0.5, y1: ids.length - 0.5, line: { color: '#dc2626', width: 1, dash: 'dash' } }
+    ]
+  });
+  Plotly.newPlot('advInfluencePlot', barData, barLayout, { responsive: true });
+
+  document.getElementById('advInfluenceStats').innerHTML =
+    '<div class="stat-card"><div class="stat-value">' + escapeHtml(result.most_influential) + '<\/div><div class="stat-label">Most Influential Review<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.tipping_point + '<\/div><div class="stat-label">Tipping Point (removals to change sign)<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + roundN(result.full_theta, 4) + '<\/div><div class="stat-label">Full Pooled Estimate<\/div><\/div>';
+}
+
+function renderAdvChangepoint() {
+  var result = computeAdvChangepoint(reviews);
+  if (!result) {
+    document.getElementById('advChangepointPlot').innerHTML = '<p class="text-muted text-center">Need at least 3 reviews with year data.<\/p>';
+    return;
+  }
+
+  var isDark = document.body.classList.contains('dark');
+  var ciLos = reviews.slice().sort(function(a, b) { return a.year - b.year; }).map(function(r) { return r.ci_lo; });
+  var ciHis = reviews.slice().sort(function(a, b) { return a.year - b.year; }).map(function(r) { return r.ci_hi; });
+  var errLo = result.thetas.map(function(t, i) { return t - ciLos[i]; });
+  var errHi = result.thetas.map(function(t, i) { return ciHis[i] - t; });
+
+  var scatterData = [
+    {
+      x: result.years,
+      y: result.thetas,
+      error_y: { type: 'data', symmetric: false, array: errHi, arrayminus: errLo, thickness: 2, width: 4 },
+      mode: 'markers+text',
+      type: 'scatter',
+      marker: { size: 10, color: '#0f766e', symbol: 'circle' },
+      text: result.labels,
+      textposition: 'top center',
+      textfont: { size: 9, color: isDark ? '#94a3b8' : '#64748b' },
+      hovertemplate: '%{text}: %{y:.4f} (%{x})<extra><\/extra>'
+    }
+  ];
+  var scatterLayout = Object.assign({}, getPlotlyLayout('Effect Estimates Over Time'), {
+    xaxis: { title: 'Publication Year', dtick: 1 },
+    yaxis: { title: 'Effect Estimate (theta)', zeroline: true, zerolinewidth: 1, zerolinecolor: isDark ? '#475569' : '#cbd5e1' },
+    height: 400,
+    shapes: [
+      { type: 'line', x0: result.cp_year + 0.5, x1: result.cp_year + 0.5,
+        y0: Math.min.apply(null, result.thetas) - 0.3, y1: Math.max.apply(null, result.thetas) + 0.3,
+        line: { color: '#dc2626', width: 2, dash: 'dash' } }
+    ],
+    annotations: [
+      { x: result.cp_year + 0.5, y: Math.max.apply(null, result.thetas) + 0.2,
+        text: 'Change-point: ' + result.cp_year, showarrow: false,
+        font: { color: '#dc2626', size: 11 } }
+    ]
+  });
+  Plotly.newPlot('advChangepointPlot', scatterData, scatterLayout, { responsive: true });
+
+  document.getElementById('advChangepointStats').innerHTML =
+    '<div class="stat-card"><div class="stat-value">' + result.cp_year + '<\/div><div class="stat-label">CUSUM Change-Point Year<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.slope + '<\/div><div class="stat-label">Drift Slope (per year)<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.before_theta + '<\/div><div class="stat-label">Before Change-Point<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.after_theta + '<\/div><div class="stat-label">After Change-Point<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.delta + '<\/div><div class="stat-label">Delta (after - before)<\/div><\/div>';
+}
+
+function renderAdvRobust() {
+  var result = computeAdvRobust(reviews);
+  if (!result) {
+    document.getElementById('advRobustPlot').innerHTML = '<p class="text-muted text-center">Need at least 2 reviews.<\/p>';
+    return;
+  }
+
+  var isDark = document.body.classList.contains('dark');
+  var methods = ['Standard IV', 'Weighted Median', 'Huber M-est.', 'Winsorized'];
+  var estimates = [result.standard.theta, result.median.theta, result.huber.theta, result.winsorized.theta];
+  var ciLos = [result.standard.ci_lo, result.median.ci_lo, result.huber.ci_lo, result.winsorized.ci_lo];
+  var ciHis = [result.standard.ci_hi, result.median.ci_hi, result.huber.ci_hi, result.winsorized.ci_hi];
+  var errLo = estimates.map(function(e, i) { return e - ciLos[i]; });
+  var errHi = estimates.map(function(e, i) { return ciHis[i] - e; });
+
+  var barData = [{
+    y: methods,
+    x: estimates,
+    error_x: { type: 'data', symmetric: false, array: errHi, arrayminus: errLo, thickness: 2, width: 6 },
+    type: 'bar',
+    orientation: 'h',
+    marker: { color: ['#0f766e', '#2563eb', '#d97706', '#7c3aed'] },
+    text: estimates.map(function(e) { return e.toFixed(4); }),
+    textposition: 'outside',
+    hovertemplate: '%{y}: %{x:.4f} (%{customdata[0]:.4f} to %{customdata[1]:.4f})<extra><\/extra>',
+    customdata: methods.map(function(_, i) { return [ciLos[i], ciHis[i]]; })
+  }];
+  var barLayout = Object.assign({}, getPlotlyLayout('Robust Estimator Comparison'), {
+    xaxis: { title: 'Pooled Effect Estimate', zeroline: true, zerolinewidth: 2, zerolinecolor: isDark ? '#475569' : '#cbd5e1' },
+    yaxis: { autorange: 'reversed' },
+    height: 300,
+    margin: { l: 140, r: 80, t: 50, b: 60 }
+  });
+  Plotly.newPlot('advRobustPlot', barData, barLayout, { responsive: true });
+
+  var outlierText = result.outlier_flags.length > 0 ? result.outlier_flags.join(', ') : 'None';
+  document.getElementById('advRobustStats').innerHTML =
+    '<div class="stat-card"><div class="stat-value">' + result.standard.theta.toFixed(4) + '<\/div><div class="stat-label">Standard IV<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.huber.theta.toFixed(4) + '<\/div><div class="stat-label">Huber M-est.<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + roundN(Math.abs(result.standard.theta - result.huber.theta), 4) + '<\/div><div class="stat-label">|Standard - Huber|<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + escapeHtml(outlierText) + '<\/div><div class="stat-label">Outlier Reviews (Huber)<\/div><\/div>';
+}
+
+function renderAdvFunnel() {
+  var result = computeAdvFunnel(reviews);
+  if (!result) {
+    document.getElementById('advFunnelPlot').innerHTML = '<p class="text-muted text-center">Need at least 3 reviews.<\/p>';
+    return;
+  }
+
+  var isDark = document.body.classList.contains('dark');
+  // Funnel scatter
+  var funnelData = [
+    {
+      x: result.thetas,
+      y: result.precision,
+      mode: 'markers+text',
+      type: 'scatter',
+      marker: { size: 10, color: '#0f766e', symbol: 'circle' },
+      text: result.labels,
+      textposition: 'top right',
+      textfont: { size: 9, color: isDark ? '#94a3b8' : '#64748b' },
+      hovertemplate: '%{text}: theta=%{x:.4f}, precision=%{y:.2f}<extra><\/extra>',
+      name: 'Reviews'
+    }
+  ];
+
+  // Egger regression line
+  var minPrec = Math.min.apply(null, result.precision);
+  var maxPrec = Math.max.apply(null, result.precision);
+  var lineX0 = result.egger_intercept / minPrec + result.egger_slope;
+  var lineX1 = result.egger_intercept / maxPrec + result.egger_slope;
+  // The Egger model is z = a + b*prec, so theta = z*se = (a + b*prec)*se = a/prec + b
+  // Actually: z = a + b*(1/se), theta = z*se = a*se + b, so at precision p: theta = a/p + b
+  // Plot the regression line as theta vs precision
+  var nLinePoints = 50;
+  var lineXvals = [], lineYvals = [];
+  var precStep = (maxPrec - minPrec) / (nLinePoints - 1);
+  for (var i = 0; i < nLinePoints; i++) {
+    var p = minPrec + i * precStep;
+    lineYvals.push(p);
+    lineXvals.push(result.egger_intercept / p + result.egger_slope);
+  }
+  funnelData.push({
+    x: lineXvals,
+    y: lineYvals,
+    mode: 'lines',
+    type: 'scatter',
+    line: { color: '#dc2626', width: 2, dash: 'dash' },
+    name: 'Egger regression',
+    hovertemplate: 'Egger line: theta=%{x:.4f}<extra><\/extra>'
+  });
+
+  // Vertical line at pooled estimate
+  funnelData.push({
+    x: [result.theta_pooled, result.theta_pooled],
+    y: [minPrec * 0.8, maxPrec * 1.1],
+    mode: 'lines',
+    type: 'scatter',
+    line: { color: isDark ? '#475569' : '#94a3b8', width: 1, dash: 'dot' },
+    name: 'Pooled estimate',
+    hoverinfo: 'skip'
+  });
+
+  var funnelLayout = Object.assign({}, getPlotlyLayout('Funnel Plot (theta vs precision)'), {
+    xaxis: { title: 'Effect Estimate (theta)' },
+    yaxis: { title: 'Precision (1/SE)' },
+    height: 400,
+    showlegend: true,
+    legend: { x: 0.01, y: 0.99 }
+  });
+  Plotly.newPlot('advFunnelPlot', funnelData, funnelLayout, { responsive: true });
+
+  var biasClass = result.bias_detected ? 'badge-contradictory' : 'badge-concordant';
+  var biasText = result.bias_detected ? 'Detected (p < 0.1)' : 'Not Detected';
+  document.getElementById('advFunnelStats').innerHTML =
+    '<div class="stat-card"><div class="stat-value"><span class="badge ' + biasClass + '">' + biasText + '<\/span><\/div><div class="stat-label">Publication Bias<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.egger_intercept + '<\/div><div class="stat-label">Egger Intercept<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.egger_p + '<\/div><div class="stat-label">Egger p-value<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.begg_tau + '<\/div><div class="stat-label">Begg Tau<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.begg_p + '<\/div><div class="stat-label">Begg p-value<\/div><\/div>' +
+    '<div class="stat-card"><div class="stat-value">' + result.n_missing + '<\/div><div class="stat-label">Trim-Fill Missing<\/div><\/div>';
+}
+
 // ===== Tab Switching =====
 
 function switchTab(tabName) {
@@ -1602,6 +2261,7 @@ function toggleDarkMode() {
     renderQualityTab();
     renderEffectsTab();
     renderDiscordanceTab();
+    renderAdvancedTab();
   }
 }
 
