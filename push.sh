@@ -41,6 +41,6 @@ fi
 
 echo ""
 echo "Pushed to GitHub. View at:"
-echo "  https://github.com/mahmood726-cyber/umbrella-review-classifier"
-echo "  https://mahmood726-cyber.github.io/umbrella-review-classifier/"
-echo "  https://mahmood726-cyber.github.io/umbrella-review-classifier/e156-submission/"
+echo "  https://github.com/mahmood726-cyber/umbrella-engine-sr-of-srs"
+echo "  https://mahmood726-cyber.github.io/umbrella-engine-sr-of-srs/"
+echo "  https://mahmood726-cyber.github.io/umbrella-engine-sr-of-srs/e156-submission/"

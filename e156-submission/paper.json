@@ -48,7 +48,7 @@
   "type": "methods",
   "primary_estimand": "Corrected Covered Area (CCA) for study overlap",
   "validation": {
-    "status": "pass",
+    "status": "fail",
     "checks": [
       {
         "name": "single paragraph",
@@ -77,8 +77,8 @@
       },
       {
         "name": "result sentence has interval",
-        "ok": true,
-        "detail": "Sentence 4 should include a confidence interval."
+        "ok": false,
+        "detail": "Sentence 4 should include a quantitative result such as a percentage, count, or interval."
       },
       {
         "name": "result sentence has estimand",
