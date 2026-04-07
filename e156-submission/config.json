@@ -49,10 +49,11 @@
     "validation": "DRAFT"
   },
   "affiliation": "Tahir Heart Institute",
-  "email": "author@example.com",
+  "email": "mahmood.ahmad2@nhs.net",
   "references": [
     "Pieper D, Antoine SL, Mathes T, et al. Systematic review finds overlapping reviews were not mentioned in every other overview. J Clin Epidemiol. 2014;67(4):368-375.",
     "Shea BJ, Reeves BC, Wells G, et al. AMSTAR 2: a critical appraisal tool for systematic reviews. BMJ. 2017;358:j4008.",
     "Aromataris E, Fernandez R, Godfrey CM, et al. Summarizing systematic reviews: methodological development, conduct and reporting of an umbrella review approach. JBI Evid Implement. 2015;13(3):132-140."
-  ]
+  ],
+  "submitted": false
 }
