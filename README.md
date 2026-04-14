@@ -68,7 +68,7 @@ python -m pytest tests/ -v
 
 ## Citation
 
-AUTHOR_PLACEHOLDER. UmbrellaEngine: A browser-based tool for umbrella reviews. 2026.
+Mahmood Ahmad. UmbrellaEngine: A browser-based tool for umbrella reviews. 2026.
 
 ## License
 
