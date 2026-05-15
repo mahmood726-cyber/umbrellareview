@@ -2,17 +2,17 @@ Mahmood Ahmad
 Tahir Heart Institute
 author@example.com
 
-Protocol: Umbrella Review Evidence Classifier with Credibility Grading
+Protocol: UmbrellaEngine: Browser-Based Umbrella Review with Overlap Quantification, Quality Assessment, and Discordance Analysis
 
-This protocol describes the planned evidence synthesis for Umbrella Review Evidence Classifier with Credibility Grading, targeting transparent, reproducible estimation of Evidence conviction class in a versioned workflow. Eligible inputs include published studies and validated computational outputs addressing the target estimand, with no restrictions on publication year, language, or clinical domain. Searches will cover PubMed, Embase, and the Cochrane Central Register using structured strategies, reference-list screening, and duplicate full-text review before extraction. The primary analysis will estimate Evidence conviction class using restricted maximum likelihood random-effects meta-analysis, reporting 95 percent confidence intervals, prediction intervals, and prespecified model checks. Heterogeneity will be summarised using I-squared and tau-squared, with sensitivity analyses across variance estimators, exclusion scenarios, and leave-one-out patterns. Analysis code will be versioned and archived at https://github.com/mahmood726-cyber/umbrellareview, and reporting will follow PRISMA 2020 guidance to support independent verification and reuse. Anticipated limitations include publication bias, clinical heterogeneity, sparse data in some settings, and the constraints of aggregate-level evidence synthesis.
+This protocol describes the evidence synthesis for UmbrellaEngine: Browser-Based Umbrella Review with Overlap Quantification, Quality, targeting transparent, reproducible estimation of the primary estimand in a versioned workflow. Eligible inputs include published studies and validated computational outputs addressing the target estimand, with no restrictions on publication year, language, or clinical domain. Searches will cover PubMed, Embase, and the Cochrane Central Register using structured strategies, reference-list screening, and duplicate full-text review before extraction. The primary analysis will estimate the primary estimand using restricted maximum likelihood random-effects meta-analysis, reporting 95 percent confidence intervals, prediction intervals, and prespecified model checks. Heterogeneity will be summarised using I-squared and tau-squared, with sensitivity analyses across variance estimators, exclusion scenarios, and leave-one-out patterns. Analysis code will be versioned and archived at https://github.com/PLACEHOLDER/umbrella-engine, and reporting will follow PRISMA 2020 guidance to support independent verification and reuse. Anticipated limitations include publication bias, clinical heterogeneity, sparse data in some settings, and the constraints of aggregate-level evidence synthesis.
 
 Outside Notes
 
 Type: protocol
-Primary estimand: Evidence conviction class
-App: Umbrella Review Pro v1.0
-Code: https://github.com/mahmood726-cyber/umbrellareview
-Date: 2026-03-26
+Primary estimand: Corrected Covered Area (CCA) for study overlap
+App: UmbrellaEngine v1.0
+Code: https://github.com/PLACEHOLDER/umbrella-engine
+Date: 2026-04-01
 Validation: DRAFT
 
 References
